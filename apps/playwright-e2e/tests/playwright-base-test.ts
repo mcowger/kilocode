@@ -4,7 +4,7 @@ export { expect } from "@playwright/test"
 import * as path from "path"
 import * as os from "os"
 import * as fs from "fs"
-import { setupConsoleLogging, cleanLogMessage, isTestRelevant } from "../helpers/console-logging"
+import { setupConsoleLogging, cleanLogMessage } from "../helpers/console-logging"
 
 const __dirname = path.dirname(__filename)
 
@@ -59,7 +59,7 @@ export const test = base.extend<TestFixtures>({
 			electronApp.process().stdout?.on("data", (data) => {
 				const output = data.toString().trim()
 				const cleaned = cleanLogMessage(output)
-				if (cleaned && isTestRelevant(cleaned, "INFO")) {
+				if (cleaned) {
 					console.log(`📋 [VSCode] ${cleaned}`)
 				}
 			})
