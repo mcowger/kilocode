@@ -3,29 +3,26 @@ import { useEffect, useRef } from "react"
 interface UseQueuedMessageAutoSubmitProps {
 	sendingDisabled: boolean
 	hasQueuedMessage: boolean
-	queuedMessage: string | null
-	queuedImages: string[]
+	inputValue: string
+	selectedImages: string[]
 	onAutoSubmit: (message: string, images: string[]) => void
-	clearQueuedMessage: () => void
-	inputValue: string // Add input tracking for race condition prevention
+	clearQueuedState: () => void
 }
 
 /**
  * Custom hook to handle auto-submission of queued messages when agent becomes idle.
- * Monitors sendingDisabled state and triggers auto-submit with debounced timing.
+ * Monitors sendingDisabled state and triggers auto-submit with current input value.
  */
 export function useQueuedMessageAutoSubmit({
 	sendingDisabled,
 	hasQueuedMessage,
-	queuedMessage,
-	queuedImages,
-	onAutoSubmit,
-	clearQueuedMessage,
 	inputValue,
+	selectedImages,
+	onAutoSubmit,
+	clearQueuedState,
 }: UseQueuedMessageAutoSubmitProps) {
 	const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 	const prevSendingDisabledRef = useRef(sendingDisabled)
-	const inputValueAtQueueTimeRef = useRef<string>("")
 
 	useEffect(() => {
 		// Clear any existing timeout
@@ -34,28 +31,21 @@ export function useQueuedMessageAutoSubmit({
 			timeoutRef.current = null
 		}
 
-		if (hasQueuedMessage && sendingDisabled) {
-			inputValueAtQueueTimeRef.current = inputValue
-		}
-
 		const justBecameIdle = prevSendingDisabledRef.current === true && sendingDisabled === false
 
 		// Update previous state for next comparison
 		prevSendingDisabledRef.current = sendingDisabled
 
 		// Only proceed if agent just became idle and we have a queued message
-		if (justBecameIdle && hasQueuedMessage && queuedMessage) {
+		if (justBecameIdle && hasQueuedMessage) {
 			timeoutRef.current = setTimeout(() => {
-				const userTypedNewContent = inputValue !== inputValueAtQueueTimeRef.current && inputValue.trim() !== ""
-
-				if (userTypedNewContent) {
-					timeoutRef.current = null
-					return
-				}
-
-				if (hasQueuedMessage && queuedMessage && !sendingDisabled) {
-					onAutoSubmit(queuedMessage, queuedImages)
-					clearQueuedMessage()
+				// Submit whatever is currently in the input box
+				if (hasQueuedMessage && !sendingDisabled) {
+					const trimmedInput = inputValue.trim()
+					if (trimmedInput || selectedImages.length > 0) {
+						onAutoSubmit(trimmedInput, selectedImages)
+						clearQueuedState()
+					}
 				}
 
 				timeoutRef.current = null
@@ -69,7 +59,7 @@ export function useQueuedMessageAutoSubmit({
 				timeoutRef.current = null
 			}
 		}
-	}, [sendingDisabled, hasQueuedMessage, queuedMessage, queuedImages, onAutoSubmit, clearQueuedMessage, inputValue])
+	}, [sendingDisabled, hasQueuedMessage, inputValue, selectedImages, onAutoSubmit, clearQueuedState])
 
 	// Cleanup on unmount
 	useEffect(() => {

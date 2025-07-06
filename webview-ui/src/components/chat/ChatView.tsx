@@ -135,21 +135,18 @@ const ChatViewComponent: React.ForwardRefRenderFunction<ChatViewRef, ChatViewPro
 	const [sendingDisabled, setSendingDisabled] = useState(false)
 	const [selectedImages, setSelectedImages] = useState<string[]>([])
 
-	// kilocode_change start: Add queued messages state management
-	const [queuedMessage, setQueuedMessage] = useState<string | null>(null)
-	const [queuedImages, setQueuedImages] = useState<string[]>([])
-	const hasQueuedMessage = useMemo(() => queuedMessage !== null && queuedMessage.trim() !== "", [queuedMessage])
+	// kilocode_change start: Add queued state management (text stays in input box)
+	const [isInQueuedState, setIsInQueuedState] = useState(false)
+	const hasQueuedMessage = isInQueuedState
 
-	const clearQueuedMessage = useCallback(() => {
-		setQueuedMessage(null)
-		setQueuedImages([])
+	const clearQueuedState = useCallback(() => {
+		setIsInQueuedState(false)
 	}, [])
 
-	const storeMessageInQueue = useCallback((text: string, images: string[]) => {
-		setQueuedMessage(text)
-		setQueuedImages(images)
+	const enterQueuedState = useCallback(() => {
+		setIsInQueuedState(true)
 	}, [])
-	// kilocode_change end: Add queued messages state management
+	// kilocode_change end: Add queued state management (text stays in input box)
 
 	// we need to hold on to the ask because useEffect > lastMessage will always let us know when an ask comes in and handle it, but by the time handleMessage is called, the last message might not be the ask anymore (it could be a say that followed)
 	const [clineAsk, setClineAsk] = useState<ClineAsk | undefined>(undefined)
@@ -527,35 +524,34 @@ const ChatViewComponent: React.ForwardRefRenderFunction<ChatViewRef, ChatViewPro
 		setClineAsk(undefined)
 		setEnableButtons(false)
 
-		// kilocode_change start: Clear queued message on chat reset
+		// kilocode_change start: Clear queued state on chat reset
 		if (hasQueuedMessage) {
-			clearQueuedMessage()
+			clearQueuedState()
 		}
-		// kilocode_change end: Clear queued message on chat reset
+		// kilocode_change end: Clear queued state on chat reset
 
 		// Do not reset mode here as it should persist.
 		// setPrimaryButtonText(undefined)
 		// setSecondaryButtonText(undefined)
 		disableAutoScrollRef.current = false
-	}, [hasQueuedMessage, clearQueuedMessage])
+	}, [hasQueuedMessage, clearQueuedState])
 
 	const handleSendMessage = useCallback(
 		(text: string, images: string[]) => {
 			text = text.trim()
 
 			if (text || images.length > 0) {
-				// kilocode_change start: Enhanced queued messages routing logic with race condition protection
+				// kilocode_change start: Enhanced queued state logic - keep text in input box
 				if (sendingDisabled) {
-					storeMessageInQueue(text, images)
-					setInputValue("")
-					setSelectedImages([])
+					enterQueuedState()
+					// Don't clear input - user can continue editing until agent becomes idle
 					return
 				} else {
 					if (hasQueuedMessage) {
-						clearQueuedMessage()
+						clearQueuedState()
 					}
 				}
-				// kilocode_change end: Enhanced queued messages routing logic with race condition protection
+				// kilocode_change end: Enhanced queued state logic - keep text in input box
 
 				if (messagesRef.current.length === 0) {
 					vscode.postMessage({ type: "newTask", text, images })
@@ -594,33 +590,24 @@ const ChatViewComponent: React.ForwardRefRenderFunction<ChatViewRef, ChatViewPro
 				handleChatReset()
 			}
 		},
-		[
-			handleChatReset,
-			sendingDisabled,
-			storeMessageInQueue,
-			hasQueuedMessage,
-			clearQueuedMessage,
-			setInputValue,
-			setSelectedImages,
-		], // messagesRef and clineAskRef are stable
+		[handleChatReset, sendingDisabled, enterQueuedState, hasQueuedMessage, clearQueuedState], // messagesRef and clineAskRef are stable
 	)
 
-	// kilocode_change start: Add auto-submit logic for queued messages with race condition prevention
+	// kilocode_change start: Add auto-submit logic for queued state with current input value
 	useQueuedMessageAutoSubmit({
 		sendingDisabled,
 		hasQueuedMessage,
-		queuedMessage,
-		queuedImages,
+		inputValue,
+		selectedImages,
 		onAutoSubmit: useCallback(
 			(message: string, images: string[]) => {
 				handleSendMessage(message, images)
 			},
 			[handleSendMessage],
 		),
-		clearQueuedMessage,
-		inputValue, // Add input value for race condition prevention
+		clearQueuedState,
 	})
-	// kilocode_change end: Add auto-submit logic for queued messages with race condition prevention
+	// kilocode_change end: Add auto-submit logic for queued state with current input value
 
 	const handleSetChatBoxMessage = useCallback(
 		(text: string, images: string[]) => {
@@ -638,6 +625,22 @@ const ChatViewComponent: React.ForwardRefRenderFunction<ChatViewRef, ChatViewPro
 	)
 
 	const startNewTask = useCallback(() => vscode.postMessage({ type: "clearTask" }), [])
+
+	// kilocode_change start: Add interjection handler for Alt/Option + Enter
+	const handleInterjection = useCallback(() => {
+		// Only allow interjection when agent is streaming/busy
+		if (!isStreaming) {
+			return
+		}
+
+		// Cancel current operation (same as clicking cancel button)
+		vscode.postMessage({ type: "cancelTask" })
+		setDidClickCancel(true)
+
+		// Queue the current message for auto-submission when agent becomes idle
+		enterQueuedState()
+	}, [isStreaming, enterQueuedState])
+	// kilocode_change end: Add interjection handler for Alt/Option + Enter
 
 	// This logic depends on the useEffect[messages] above to set clineAsk,
 	// after which buttons are shown and we then send an askResponse to the
@@ -1715,6 +1718,8 @@ const ChatViewComponent: React.ForwardRefRenderFunction<ChatViewRef, ChatViewPro
 				setMode={setMode}
 				modeShortcutText={modeShortcutText}
 				hasQueuedMessage={hasQueuedMessage}
+				onInterjection={handleInterjection}
+				onClearQueuedState={clearQueuedState}
 			/>
 			{/* kilocode_change: added settings toggle the profile and model selection */}
 			<BottomControls showApiConfig />

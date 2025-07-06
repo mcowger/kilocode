@@ -58,9 +58,11 @@ interface ChatTextAreaProps {
 	mode: Mode
 	setMode: (value: Mode) => void
 	modeShortcutText: string
-	// kilocode_change start: Add queued message indicator
+	// kilocode_change start: Add queued message indicator and interjection
 	hasQueuedMessage?: boolean
-	// kilocode_change end: Add queued message indicator
+	onInterjection?: () => void
+	onClearQueuedState?: () => void
+	// kilocode_change end: Add queued message indicator and interjection
 }
 
 const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
@@ -80,9 +82,11 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 			mode,
 			setMode,
 			modeShortcutText,
-			// kilocode_change start: Add queued message indicator
+			// kilocode_change start: Add queued message indicator and interjection
 			hasQueuedMessage = false,
-			// kilocode_change end: Add queued message indicator
+			onInterjection,
+			onClearQueuedState,
+			// kilocode_change end: Add queued message indicator and interjection
 		},
 		ref,
 	) => {
@@ -539,6 +543,24 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 					return
 				}
 
+				// kilocode_change start: Add interjection support (Alt/Option + Enter)
+				if (event.key === "Enter" && (event.altKey || event.metaKey) && !isComposing) {
+					event.preventDefault()
+					if (onInterjection) {
+						onInterjection()
+					}
+					return
+				}
+				// kilocode_change end: Add interjection support
+
+				// kilocode_change start: Add Escape key to clear queued state
+				if (event.key === "Escape" && hasQueuedMessage && onClearQueuedState) {
+					event.preventDefault()
+					onClearQueuedState()
+					return
+				}
+				// kilocode_change end: Add Escape key to clear queued state
+
 				if (event.key === "Enter" && !event.shiftKey && !isComposing) {
 					event.preventDefault()
 
@@ -615,6 +637,9 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 				setInputValue,
 				localWorkflows, // kilocode_change
 				globalWorkflows, // kilocode_change
+				onInterjection, // kilocode_change: Add interjection handler
+				hasQueuedMessage, // kilocode_change: Add queued state for Escape key handler
+				onClearQueuedState, // kilocode_change: Add clear queued state handler
 			],
 		)
 
@@ -1059,9 +1084,12 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 									"border",
 									"border-vscode-statusBarItem-warningBorder",
 									"shadow-sm",
-									"pointer-events-none",
+									"cursor-pointer",
 									"select-none",
-								)}>
+									"hover:bg-vscode-statusBarItem-warningBackground/80",
+								)}
+								onClick={() => onClearQueuedState?.()}
+								title="Click to cancel queued message or press Escape">
 								queued
 							</div>
 						)}
@@ -1203,6 +1231,9 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 									"scrollbar-none",
 									"pb-16", // Increased padding to prevent overlap with control bar
 									"scroll-pb-16", // Increased padding to prevent overlap with control bar
+									// kilocode_change start: Visual feedback for queued message
+									hasQueuedMessage && "opacity-65 text-vscode-descriptionForeground",
+									// kilocode_change end: Visual feedback for queued message
 								)}
 								onScroll={() => updateHighlights()}
 							/>
