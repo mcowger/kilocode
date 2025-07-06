@@ -1067,31 +1067,40 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 						}}>
 						{/* kilocode_change start: Add queued message indicator */}
 						{hasQueuedMessage && (
-							<div
-								data-testid="queued-indicator"
-								className={cn(
-									"absolute",
-									"top-1",
-									"right-1",
-									"z-[1001]",
-									"px-2",
-									"py-1",
-									"text-xs",
-									"font-medium",
-									"bg-vscode-statusBarItem-warningBackground",
-									"text-vscode-statusBarItem-warningForeground",
-									"rounded",
-									"border",
-									"border-vscode-statusBarItem-warningBorder",
-									"shadow-sm",
-									"cursor-pointer",
-									"select-none",
-									"hover:bg-vscode-statusBarItem-warningBackground/80",
-								)}
-								onClick={() => onClearQueuedState?.()}
-								title="Click to cancel queued message or press Escape">
-								queued
-							</div>
+							<StandardTooltip
+								content={
+									<div className="text-center">
+										<div>{t("chat:queuedMessage.autoSendTooltip")}</div>
+										<div>{t("chat:queuedMessage.clickToClearTooltip")}</div>
+									</div>
+								}
+								side="left"
+								sideOffset={8}>
+								<div
+									data-testid="queued-indicator"
+									className={cn(
+										"absolute",
+										"top-1",
+										"right-1",
+										"z-[1001]",
+										"px-2",
+										"py-1",
+										"text-xs",
+										"font-medium",
+										"bg-vscode-statusBarItem-warningBackground",
+										"text-vscode-statusBarItem-warningForeground",
+										"rounded",
+										"border",
+										"border-vscode-statusBarItem-warningBorder",
+										"shadow-sm",
+										"cursor-pointer",
+										"select-none",
+										"hover:bg-vscode-statusBarItem-warningBackground/80",
+									)}
+									onClick={() => onClearQueuedState?.()}>
+									queued
+								</div>
+							</StandardTooltip>
 						)}
 						{/* kilocode_change end: Add queued message indicator */}
 						{/* kilocode_change start: pull slash commands from Cline */}

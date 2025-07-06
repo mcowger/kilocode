@@ -317,5 +317,9 @@
 		"indexed": "Zaindeksowane",
 		"error": "Błąd indeksu",
 		"status": "Status indeksu"
+	},
+	"queuedMessage": {
+		"autoSendTooltip": "Wiadomość zostanie wysłana automatycznie, gdy agent jest nieaktywny",
+		"clickToClearTooltip": "Kliknij, aby usunąć oczekującą wiadomość"
 	}
 }

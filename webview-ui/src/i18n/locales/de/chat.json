@@ -317,5 +317,9 @@
 		"indexed": "Indiziert",
 		"error": "Index-Fehler",
 		"status": "Index-Status"
+	},
+	"queuedMessage": {
+		"autoSendTooltip": "Nachricht wird automatisch gesendet, wenn der Agent inaktiv ist",
+		"clickToClearTooltip": "Klicken Sie, um die Nachricht in der Warteschlange zu löschen"
 	}
 }

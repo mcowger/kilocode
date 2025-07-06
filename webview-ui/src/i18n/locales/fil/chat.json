@@ -317,5 +317,9 @@
 		"indexed": "Na-index",
 		"error": "Error sa index",
 		"status": "Status ng index"
+	},
+	"queuedMessage": {
+		"clickToClearTooltip": "I-click upang i-clear ang nakahilera na mensahe",
+		"autoSendTooltip": "Awtomatikong mapapadala ang mensahe kapag ang ahente ay hindi aktibo"
 	}
 }

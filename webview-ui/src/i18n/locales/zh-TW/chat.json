@@ -317,5 +317,9 @@
 		"indexed": "已索引",
 		"error": "索引錯誤",
 		"status": "索引狀態"
+	},
+	"queuedMessage": {
+		"autoSendTooltip": "当客服人员空闲时，消息将自动发送",
+		"clickToClearTooltip": "点击清除排队消息"
 	}
 }

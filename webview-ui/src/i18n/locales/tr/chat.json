@@ -317,5 +317,9 @@
 		"indexed": "İndekslendi",
 		"error": "İndeks hatası",
 		"status": "İndeks durumu"
+	},
+	"queuedMessage": {
+		"autoSendTooltip": "Temsilci boşta olduğunda mesaj otomatik olarak gönderilecek",
+		"clickToClearTooltip": "Kuyruktaki mesajı temizlemek için tıklayın"
 	}
 }

@@ -317,5 +317,9 @@
 		"indexed": "Indexerat",
 		"error": "Indexfel",
 		"status": "Indexstatus"
+	},
+	"queuedMessage": {
+		"autoSendTooltip": "Meddelandet skickas automatiskt när agenten är inaktiv",
+		"clickToClearTooltip": "Klicka för att rensa köat meddelande"
 	}
 }

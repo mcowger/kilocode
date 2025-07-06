@@ -317,5 +317,9 @@
 		"indexed": "Terindeks",
 		"error": "Error indeks",
 		"status": "Status indeks"
+	},
+	"queuedMessage": {
+		"clickToClearTooltip": "Klik untuk menghapus pesan dalam antrean",
+		"autoSendTooltip": "Pesan akan otomatis terkirim saat agen sedang tidak aktif"
 	}
 }

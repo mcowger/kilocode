@@ -317,5 +317,9 @@
 		"indexed": "Indexed",
 		"error": "Index error",
 		"status": "Index status"
+	},
+	"queuedMessage": {
+		"autoSendTooltip": "Message will auto-send when the agent is idle",
+		"clickToClearTooltip": "Click to clear the queued message"
 	}
 }

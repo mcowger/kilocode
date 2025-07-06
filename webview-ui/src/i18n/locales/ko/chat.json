@@ -317,5 +317,9 @@
 		"indexed": "인덱싱 완료",
 		"error": "인덱스 오류",
 		"status": "인덱스 상태"
+	},
+	"queuedMessage": {
+		"clickToClearTooltip": "대기 중인 메시지를 지우려면 클릭하세요",
+		"autoSendTooltip": "상담사가 유휴 상태일 때 메시지가 자동으로 전송됩니다"
 	}
 }

@@ -317,5 +317,9 @@
 		"indexed": "Đã lập chỉ mục",
 		"error": "Lỗi chỉ mục",
 		"status": "Trạng thái chỉ mục"
+	},
+	"queuedMessage": {
+		"autoSendTooltip": "Tin nhắn sẽ tự động gửi khi nhân viên đang rảnh",
+		"clickToClearTooltip": "Nhấp để xóa tin nhắn trong hàng đợi"
 	}
 }

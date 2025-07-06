@@ -317,5 +317,9 @@
 		"indexed": "Indexat",
 		"error": "Error d'índex",
 		"status": "Estat de l'índex"
+	},
+	"queuedMessage": {
+		"autoSendTooltip": "El missatge s'enviarà automàticament quan l'agent estigui inactiu",
+		"clickToClearTooltip": "Fes clic per esborrar el missatge en cua"
 	}
 }

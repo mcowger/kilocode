@@ -317,5 +317,9 @@
 		"indexed": "Indexado",
 		"error": "Erro do índice",
 		"status": "Status do índice"
+	},
+	"queuedMessage": {
+		"autoSendTooltip": "A mensagem será enviada automaticamente quando o agente estiver inativo",
+		"clickToClearTooltip": "Clique para limpar a mensagem em fila"
 	}
 }

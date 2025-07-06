@@ -317,5 +317,9 @@
 		"indexed": "インデックス作成済み",
 		"error": "インデックスエラー",
 		"status": "インデックス状態"
+	},
+	"queuedMessage": {
+		"autoSendTooltip": "エージェントがアイドル状態のときメッセージが自動送信されます",
+		"clickToClearTooltip": "キューに入っているメッセージをクリアするにはクリックしてください"
 	}
 }

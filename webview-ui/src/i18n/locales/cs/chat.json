@@ -317,5 +317,9 @@
 		"indexed": "Indexováno",
 		"error": "Chyba indexu",
 		"status": "Stav indexu"
+	},
+	"queuedMessage": {
+		"autoSendTooltip": "Zpráva se automaticky odešle, když je agent nečinný",
+		"clickToClearTooltip": "Klikněte pro vymazání zprávy ve frontě"
 	}
 }

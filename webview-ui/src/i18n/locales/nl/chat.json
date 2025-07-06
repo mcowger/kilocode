@@ -317,5 +317,9 @@
 		"indexed": "Geïndexeerd",
 		"error": "Index fout",
 		"status": "Index status"
+	},
+	"queuedMessage": {
+		"autoSendTooltip": "Bericht wordt automatisch verzonden wanneer de medewerker inactief is",
+		"clickToClearTooltip": "Klik om het bericht in de wachtrij te wissen"
 	}
 }
