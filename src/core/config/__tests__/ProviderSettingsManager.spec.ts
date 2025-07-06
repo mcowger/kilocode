@@ -6,6 +6,11 @@ import type { ProviderSettings } from "@roo-code/types"
 
 import { ProviderSettingsManager, ProviderProfiles } from "../ProviderSettingsManager"
 
+// Mock the Docker environment detection
+vi.mock("../../../utils/dockerEnvironment", () => ({
+	isDockerEnvironment: vi.fn(() => false),
+}))
+
 // Mock VSCode ExtensionContext
 const mockSecrets = {
 	get: vi.fn(),
@@ -147,6 +152,10 @@ describe("ProviderSettingsManager", () => {
 		it("should throw error if secrets storage fails", async () => {
 			mockSecrets.get.mockRejectedValue(new Error("Storage failed"))
 
+			// Mock fallback storage to also fail
+			const loadFromFallbackSpy = vi.spyOn(providerSettingsManager as any, "loadFromFallback")
+			loadFromFallbackSpy.mockRejectedValue(new Error("Fallback failed"))
+
 			await expect(providerSettingsManager.initialize()).rejects.toThrow(
 				"Failed to initialize config: Error: Failed to read provider profiles from secrets: Error: Storage failed",
 			)
@@ -207,6 +216,10 @@ describe("ProviderSettingsManager", () => {
 
 		it("should throw error if reading from secrets fails", async () => {
 			mockSecrets.get.mockRejectedValue(new Error("Read failed"))
+
+			// Mock fallback storage to also fail
+			const loadFromFallbackSpy = vi.spyOn(providerSettingsManager as any, "loadFromFallback")
+			loadFromFallbackSpy.mockRejectedValue(new Error("Fallback failed"))
 
 			await expect(providerSettingsManager.listConfig()).rejects.toThrow(
 				"Failed to list configs: Error: Failed to read provider profiles from secrets: Error: Read failed",
@@ -371,6 +384,10 @@ describe("ProviderSettingsManager", () => {
 			)
 			mockSecrets.store.mockRejectedValue(new Error("Storage failed"))
 
+			// Mock fallback storage to also fail
+			const storeToFallbackSpy = vi.spyOn(providerSettingsManager as any, "storeToFallback")
+			storeToFallbackSpy.mockRejectedValue(new Error("Fallback failed"))
+
 			await expect(providerSettingsManager.saveConfig("test", {})).rejects.toThrow(
 				"Failed to save config: Error: Failed to write provider profiles to secrets: Error: Storage failed",
 			)
@@ -500,6 +517,10 @@ describe("ProviderSettingsManager", () => {
 			)
 			mockSecrets.store.mockRejectedValue(new Error("Storage failed"))
 
+			// Mock fallback storage to also fail
+			const storeToFallbackSpy = vi.spyOn(providerSettingsManager as any, "storeToFallback")
+			storeToFallbackSpy.mockRejectedValue(new Error("Fallback failed"))
+
 			await expect(providerSettingsManager.activateProfile({ name: "test" })).rejects.toThrow(
 				"Failed to activate profile: Failed to write provider profiles to secrets: Error: Storage failed",
 			)
@@ -587,6 +608,10 @@ describe("ProviderSettingsManager", () => {
 
 		it("should throw error if secrets storage fails", async () => {
 			mockSecrets.get.mockRejectedValue(new Error("Storage failed"))
+
+			// Mock fallback storage to also fail
+			const loadFromFallbackSpy = vi.spyOn(providerSettingsManager as any, "loadFromFallback")
+			loadFromFallbackSpy.mockRejectedValue(new Error("Fallback failed"))
 
 			await expect(providerSettingsManager.hasConfig("test")).rejects.toThrow(
 				"Failed to check config existence: Error: Failed to read provider profiles from secrets: Error: Storage failed",

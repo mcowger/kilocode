@@ -130,11 +130,6 @@ export const test = base.extend<TestFixtures>({
 	},
 
 	// eslint-disable-next-line no-empty-pattern
-	setupConsoleLogging: async ({}, use) => {
-		await use(setupConsoleLogging)
-	},
-
-	// eslint-disable-next-line no-empty-pattern
 	createTempDir: async ({}, use) => {
 		const tempDirs: string[] = []
 		await use(async () => {

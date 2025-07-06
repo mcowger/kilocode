@@ -11,6 +11,7 @@ import {
 } from "@roo-code/types"
 
 import { Mode, modes } from "../../shared/modes"
+import { isDockerEnvironment } from "../../utils/dockerEnvironment"
 
 const providerSettingsWithIdSchema = providerSettingsSchema.extend({ id: z.string().optional() })
 const discriminatedProviderSettingsWithIdSchema = providerSettingsSchemaDiscriminated.and(
@@ -54,29 +55,12 @@ export class ProviderSettingsManager {
 	}
 
 	private readonly context: ExtensionContext
-	private readonly isDockerEnvironment: boolean
 
 	constructor(context: ExtensionContext) {
 		this.context = context
-		this.isDockerEnvironment = this.detectDockerEnvironment()
 
 		// TODO: We really shouldn't have async methods in the constructor.
 		this.initialize().catch(console.error)
-	}
-
-	private detectDockerEnvironment(): boolean {
-		// Check for common Docker/CI environment indicators
-		const indicators = [
-			process.env.CI === "true",
-			process.env.DOCKER === "true",
-			process.env.CONTAINER === "true",
-			fs.existsSync("/.dockerenv"),
-			process.env.GITHUB_ACTIONS === "true",
-			process.env.GITLAB_CI === "true",
-			process.env.JENKINS_URL !== undefined,
-		]
-
-		return indicators.some((indicator) => indicator)
 	}
 
 	private getFallbackConfigPath(): string {
@@ -473,7 +457,7 @@ export class ProviderSettingsManager {
 	}
 
 	private async load(): Promise<ProviderProfiles> {
-		if (this.isDockerEnvironment) {
+		if (isDockerEnvironment()) {
 			return await this.loadFromFallback()
 		}
 
@@ -506,7 +490,7 @@ export class ProviderSettingsManager {
 			}
 		} catch (error) {
 			// If VSCode secrets fail, try fallback storage as a last resort
-			if (!this.isDockerEnvironment) {
+			if (!isDockerEnvironment()) {
 				try {
 					return await this.loadFromFallback()
 				} catch (fallbackError) {
@@ -518,7 +502,7 @@ export class ProviderSettingsManager {
 	}
 
 	private async store(providerProfiles: ProviderProfiles) {
-		if (this.isDockerEnvironment) {
+		if (isDockerEnvironment()) {
 			return await this.storeToFallback(providerProfiles)
 		}
 
@@ -526,7 +510,7 @@ export class ProviderSettingsManager {
 			await this.context.secrets.store(this.secretsKey, JSON.stringify(providerProfiles, null, 2))
 		} catch (error) {
 			// If VSCode secrets fail, try fallback storage as a last resort
-			if (!this.isDockerEnvironment) {
+			if (!isDockerEnvironment()) {
 				try {
 					return await this.storeToFallback(providerProfiles)
 				} catch (fallbackError) {

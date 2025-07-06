@@ -18,6 +18,7 @@ import {
 import { TelemetryService } from "@roo-code/telemetry"
 
 import { logger } from "../../utils/logging"
+import { isDockerEnvironment } from "../../utils/dockerEnvironment"
 
 type GlobalStateKey = keyof GlobalState
 type SecretStateKey = keyof SecretState
@@ -141,27 +142,12 @@ export class ContextProxy {
 		// Update cache.
 		this.secretCache[key] = value
 
-		if (this.isDockerEnvironment()) {
+		if (isDockerEnvironment()) {
 			return Promise.resolve()
 		}
 		return value === undefined
 			? this.originalContext.secrets.delete(key)
 			: this.originalContext.secrets.store(key, value)
-	}
-
-	private isDockerEnvironment(): boolean {
-		return !!(
-			process.env.DOCKER_CONTAINER ||
-			process.env.CI ||
-			process.env.GITHUB_ACTIONS ||
-			process.env.GITLAB_CI ||
-			process.env.JENKINS_URL ||
-			process.env.BUILDKITE ||
-			process.env.CIRCLECI ||
-			process.env.TRAVIS ||
-			process.env.CONTAINER ||
-			process.env.KUBERNETES_SERVICE_HOST
-		)
 	}
 
 	private getAllSecretState(): SecretState {
