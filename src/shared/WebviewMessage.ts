@@ -216,6 +216,8 @@ export interface WebviewMessage {
 		| "profileThresholds"
 		| "setHistoryPreviewCollapsed"
 		| "clearUsageData" // kilocode_change
+		| "getUsageData" // kilocode_change
+		| "usageDataResponse" // kilocode_change
 		| "showTaskTimeline" // kilocode_change
 		| "toggleTaskFavorite" // kilocode_change
 		| "fixMermaidSyntax" // kilocode_change
