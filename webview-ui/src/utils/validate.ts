@@ -80,6 +80,9 @@ function validateModelsAndKeysProvided(apiConfiguration: ProviderSettings): stri
 		case "qwen-code":
 			// OAuth-based provider, no API key validation needed
 			break
+		case "codex":
+			// OAuth-based provider, no API key validation needed
+			break
 		// kilocode_change end
 		case "openai-native":
 			if (!apiConfiguration.openAiNativeApiKey) {

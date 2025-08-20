@@ -19,6 +19,8 @@ import {
 	geminiCliModels,
 	qwenCodeModels,
 	qwenCodeDefaultModelId,
+	codexModels,
+	codexDefaultModelId,
 	// kilocode_change end
 	mistralDefaultModelId,
 	mistralModels,
@@ -347,6 +349,11 @@ function getSelectedModel({
 		case "qwen-code": {
 			const id = apiConfiguration.apiModelId ?? qwenCodeDefaultModelId
 			const info = qwenCodeModels[id as keyof typeof qwenCodeModels]
+			return { id, info }
+		}
+		case "codex": {
+			const id = apiConfiguration.apiModelId ?? codexDefaultModelId
+			const info = codexModels[id as keyof typeof codexModels]
 			return { id, info }
 		}
 		// kilocode_change end

@@ -11,6 +11,7 @@ import {
 	// kilocode_change start
 	geminiCliModels,
 	qwenCodeModels,
+	codexModels,
 	// kilocode_change end
 	mistralModels,
 	openAiNativeModels,
@@ -36,6 +37,7 @@ export const MODELS_BY_PROVIDER: Partial<Record<ProviderName, Record<string, Mod
 	// kilocode_change start
 	"gemini-cli": geminiCliModels,
 	"qwen-code": qwenCodeModels,
+	"codex": codexModels,
 	// kilocode_change end
 	mistral: mistralModels,
 	"openai-native": openAiNativeModels,
@@ -60,6 +62,7 @@ export const PROVIDERS = [
 	{ value: "gemini-cli", label: "Gemini CLI" },
 	{ value: "virtual-quota-fallback", label: "Virtual Quota Fallback" },
 	{ value: "qwen-code", label: "Qwen Code" },
+	{ value: "codex", label: "Codex" },
 	// kilocode_change end
 	{ value: "deepseek", label: "DeepSeek" },
 	{ value: "moonshot", label: "Moonshot" },

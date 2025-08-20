@@ -14,6 +14,7 @@ export function checkExistKey(config: ProviderSettings | undefined) {
 			"claude-code",
 			"gemini-cli", // kilocode_change
 			"qwen-code", // kilocode_change
+			"codex", // kilocode_change
 		].includes(config.apiProvider)
 	) {
 		return true

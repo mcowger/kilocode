@@ -34,6 +34,7 @@ import {
 	VirtualQuotaFallbackHandler,
 	GeminiCliHandler,
 	QwenCodeHandler,
+	CodexHandler,
 	// kilocode_change end
 	ClaudeCodeHandler,
 	SambaNovaHandler,
@@ -61,6 +62,10 @@ export interface ApiHandlerCreateMessageMetadata {
 	 * Used to enforce "skip once" after a condense operation.
 	 */
 	suppressPreviousResponseId?: boolean
+	/**
+	 * Custom instructions for the model (supported by select providers like OpenAI Native for GPT-5 models).
+	 */
+	instructions?: string
 }
 
 export interface ApiHandler {
@@ -96,6 +101,8 @@ export function buildApiHandler(configuration: ProviderSettings): ApiHandler {
 			return new VirtualQuotaFallbackHandler(options)
 		case "qwen-code":
 			return new QwenCodeHandler(options)
+		case "codex":
+			return new CodexHandler(options)
 		// kilocode_change end
 		case "anthropic":
 			return new AnthropicHandler(options)

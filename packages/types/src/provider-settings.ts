@@ -45,6 +45,7 @@ export const providerNames = [
 	"gemini-cli",
 	"virtual-quota-fallback",
 	"qwen-code",
+	"codex",
 	// kilocode_change end
 	"huggingface",
 	"cerebras",
@@ -324,6 +325,10 @@ const virtualQuotaFallbackSchema = baseProviderSettingsSchema.extend({
 const qwenCodeSchema = apiModelIdProviderModelSchema.extend({
 	qwenCodeOAuthPath: z.string().optional(),
 })
+
+const codexSchema = apiModelIdProviderModelSchema.extend({
+	codexOAuthPath: z.string().optional(),
+})
 // kilocode_change end
 
 const zaiSchema = apiModelIdProviderModelSchema.extend({
@@ -371,6 +376,7 @@ export const providerSettingsSchemaDiscriminated = z.discriminatedUnion("apiProv
 	kilocodeSchema.merge(z.object({ apiProvider: z.literal("kilocode") })),
 	virtualQuotaFallbackSchema.merge(z.object({ apiProvider: z.literal("virtual-quota-fallback") })),
 	qwenCodeSchema.merge(z.object({ apiProvider: z.literal("qwen-code") })),
+	codexSchema.merge(z.object({ apiProvider: z.literal("codex") })),
 	// kilocode_change end
 	groqSchema.merge(z.object({ apiProvider: z.literal("groq") })),
 	huggingFaceSchema.merge(z.object({ apiProvider: z.literal("huggingface") })),

@@ -28,6 +28,7 @@ export { VertexHandler } from "./vertex"
 // kilocode_change start
 export { GeminiCliHandler } from "./gemini-cli"
 export { QwenCodeHandler } from "./qwen-code"
+export { CodexHandler } from "./codex"
 export { VirtualQuotaFallbackHandler } from "./virtual-quota-fallback"
 // kilocode_change end
 export { VsCodeLmHandler } from "./vscode-lm"

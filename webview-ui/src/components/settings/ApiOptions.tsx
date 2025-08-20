@@ -34,6 +34,7 @@ import {
 	fireworksDefaultModelId,
 	ioIntelligenceDefaultModelId,
 	qwenCodeDefaultModelId,
+	codexDefaultModelId,
 } from "@roo-code/types"
 
 import { vscode } from "@src/utils/vscode"
@@ -93,6 +94,7 @@ import {
 	GeminiCli,
 	VirtualQuotaFallbackProvider,
 	QwenCode,
+	Codex,
 	// kilocode_change end
 	ZAi,
 	Fireworks,
@@ -360,7 +362,8 @@ const ApiOptions = ({
 				// kilocode_change start
 				kilocode: { field: "kilocodeModel", default: kilocodeDefaultModel },
 				"gemini-cli": { field: "apiModelId", default: geminiCliDefaultModelId },
-				"qwen-code": { field: "apiModelId", default: qwenCodeDefaultModelId },
+				"qwen-code": { field: "apiModelId", default: qwenCodeDefaultModelId },				
+				"codex": { field: "apiModelId", default: codexDefaultModelId },
 				// kilocode_change end
 			}
 
@@ -399,6 +402,7 @@ const ApiOptions = ({
 			"litellm",
 			"zai",
 			"qwen-code",
+			"codex",
 		]
 
 		// Skip documentation link when the provider is excluded because documentation is not available
@@ -617,6 +621,9 @@ const ApiOptions = ({
 
 			{selectedProvider === "qwen-code" && (
 				<QwenCode apiConfiguration={apiConfiguration} setApiConfigurationField={setApiConfigurationField} />
+			)}
+			{selectedProvider === "codex" && (
+				<Codex apiConfiguration={apiConfiguration} setApiConfigurationField={setApiConfigurationField} />
 			)}
 			{/* kilocode_change end */}
 

@@ -34,6 +34,7 @@ export class OpenAiNativeHandler extends BaseProvider implements SingleCompletio
 	private lastResponseId: string | undefined
 	private responseIdPromise: Promise<string | undefined> | undefined
 	private responseIdResolver: ((value: string | undefined) => void) | undefined
+	private overrideUrl: string | null = null
 
 	// Event types handled by the shared GPT-5 event processor to avoid duplication
 	private readonly gpt5CoreHandledTypes = new Set<string>([
@@ -49,15 +50,16 @@ export class OpenAiNativeHandler extends BaseProvider implements SingleCompletio
 		"response.completed",
 	])
 
-	constructor(options: ApiHandlerOptions) {
+	constructor(options: ApiHandlerOptions, overrideUrl?: string) {
 		super()
 		this.options = options
 		// Default to including reasoning.summary: "auto" for GPT‑5 unless explicitly disabled
 		if (this.options.enableGpt5ReasoningSummary === undefined) {
 			this.options.enableGpt5ReasoningSummary = true
 		}
+		if (overrideUrl) {this.overrideUrl = overrideUrl} // Added to allow for scenarios where appending /v1/responses is not appropriate
 		const apiKey = this.options.openAiNativeApiKey ?? "not-provided"
-		this.client = new OpenAI({ baseURL: this.options.openAiNativeBaseUrl, apiKey })
+		this.client = new OpenAI({ baseURL: overrideUrl ? overrideUrl : this.options.openAiNativeBaseUrl, apiKey })
 	}
 
 	private normalizeGpt5Usage(usage: any, model: OpenAiNativeModel): ApiStreamUsageChunk | undefined {
@@ -270,7 +272,9 @@ export class OpenAiNativeHandler extends BaseProvider implements SingleCompletio
 		interface Gpt5RequestBody {
 			model: string
 			input: string
+			instructions: string
 			stream: boolean
+			store: boolean // this defaults to true (storing the full response), but is not needed for Kilo
 			reasoning?: { effort: ReasoningEffortWithMinimal; summary?: "auto" }
 			text?: { verbosity: VerbosityLevel }
 			temperature?: number
@@ -281,7 +285,9 @@ export class OpenAiNativeHandler extends BaseProvider implements SingleCompletio
 		const requestBody: Gpt5RequestBody = {
 			model: model.id,
 			input: formattedInput,
+			instructions: metadata?.instructions ?? "You are a coding agent running in the Codex CLI, a terminal-based coding assistant. Codex CLI is an open source project led by OpenAI. You are expected to be precise, safe, and helpful.",
 			stream: true,
+			store: false,
 			...(reasoningEffort && {
 				reasoning: {
 					effort: reasoningEffort,
@@ -366,6 +372,7 @@ export class OpenAiNativeHandler extends BaseProvider implements SingleCompletio
 		// Use Developer role format for GPT-5 (aligning with o1/o3 Developer role usage per GPT-5 Responses guidance)
 		// This ensures consistent instruction handling across reasoning models
 		let formattedInput = `Developer: ${systemPrompt}\n\n`
+		//let formattedInput = '' // this actually belongs in instructions field for the responses API
 
 		for (const message of messages) {
 			const role = message.role === "user" ? "User" : "Assistant"
@@ -416,8 +423,9 @@ export class OpenAiNativeHandler extends BaseProvider implements SingleCompletio
 	): ApiStream {
 		const apiKey = this.options.openAiNativeApiKey ?? "not-provided"
 		const baseUrl = this.options.openAiNativeBaseUrl || "https://api.openai.com"
-		const url = `${baseUrl}/v1/responses`
-
+		let url = `${baseUrl}/v1/responses`
+		if (this.overrideUrl) {url = `${this.overrideUrl}/responses`} //hack for codex
+		console.log(requestBody)
 		try {
 			const response = await fetch(url, {
 				method: "POST",
@@ -428,6 +436,7 @@ export class OpenAiNativeHandler extends BaseProvider implements SingleCompletio
 				},
 				body: JSON.stringify(requestBody),
 			})
+
 
 			if (!response.ok) {
 				const errorText = await response.text()

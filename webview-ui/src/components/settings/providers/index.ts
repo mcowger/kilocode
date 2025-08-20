@@ -27,6 +27,7 @@ export { XAI } from "./XAI"
 export { GeminiCli } from "./GeminiCli"
 export { VirtualQuotaFallbackProvider } from "./VirtualQuotaFallbackProvider"
 export { QwenCode } from "./QwenCode"
+export { Codex } from "./Codex"
 // kilocode_change end
 export { ZAi } from "./ZAi"
 export { LiteLLM } from "./LiteLLM"

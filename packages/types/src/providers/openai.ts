@@ -20,6 +20,20 @@ export const openAiNativeModels = {
 		// supportsVerbosity is a new capability; ensure ModelInfo includes it
 		supportsVerbosity: true,
 	},
+	"gpt-5": { //used for codex compatability
+		maxTokens: 128000,
+		contextWindow: 400000,
+		supportsImages: true,
+		supportsPromptCache: true,
+		supportsReasoningEffort: true,
+		// reasoningEffort: "medium",
+		inputPrice: 1.25,
+		outputPrice: 10.0,
+		cacheReadsPrice: 0.13,
+		description: "GPT-5: The best model for coding and agentic tasks across domains",
+		// supportsVerbosity is a new capability; ensure ModelInfo includes it
+		supportsVerbosity: true,
+	},
 	"gpt-5-mini-2025-08-07": {
 		maxTokens: 128000,
 		contextWindow: 400000,
@@ -223,6 +237,8 @@ export const openAiNativeModels = {
 			"Codex Mini: Cloud-based software engineering agent powered by codex-1, a version of o3 optimized for coding tasks. Trained with reinforcement learning to generate human-style code, adhere to instructions, and iteratively run tests.",
 	},
 } as const satisfies Record<string, ModelInfo>
+
+
 
 export const openAiModelInfoSaneDefaults: ModelInfo = {
 	maxTokens: -1,
