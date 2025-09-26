@@ -35,7 +35,7 @@ const providerManifestSchema = z
 		name: z.string().min(1, "Provider name is required"),
 		website: urlStringSchema,
 		baseUrl: urlStringSchema,
-		models_data_source: z.enum(["endpoint", "models_dev"]),
+		models_data_source: z.enum(["endpoint", "models_dev", "embedded"]),
 		models_dev_provider_id: z.string().optional(),
 		models_endpoint: z.string().optional(),
 		headers: z.record(z.string(), z.string()).optional(),
@@ -108,6 +108,11 @@ export interface ProviderModelFetchOptions {
 	apiKey?: string
 	headers?: Record<string, string>
 	forceRefresh?: boolean
+}
+
+export interface EmbeddedProviderData {
+	manifest: ProviderManifest
+	models: ProviderModelsMap
 }
 
 export interface ProviderManifestFetchOptions {
@@ -210,6 +215,34 @@ const toModelInfo = (modelId: string, raw: z.infer<typeof providerModelSchema>):
 	return modelInfo
 }
 
+export const parseEmbeddedProviderData = (rawData: string): EmbeddedProviderData => {
+	let parsed: unknown
+	try {
+		parsed = JSON.parse(rawData)
+	} catch (error) {
+		throw new Error("Embedded provider JSON is not valid JSON")
+	}
+
+	if (!Array.isArray(parsed) || parsed.length < 2) {
+		throw new Error("Embedded provider JSON must be an array with [manifest, models]")
+	}
+
+	const [manifestRaw, modelsRaw] = parsed as [unknown, unknown]
+	const manifest = providerManifestSchema.parse(manifestRaw)
+	if (manifest.models_data_source !== "embedded") {
+		throw new Error("Embedded provider manifest must set models_data_source to 'embedded'")
+	}
+
+	const modelsParsed = providerModelsResponseSchema.parse(modelsRaw)
+	const modelEntries: ProviderModelsMap = {}
+
+	for (const [modelId, modelData] of Object.entries(modelsParsed.models)) {
+		modelEntries[modelId] = toModelInfo(modelId, modelData)
+	}
+
+	return { manifest, models: modelEntries }
+}
+
 const fetchModelsFromEndpoint = async (
 	manifest: ProviderManifest,
 	options: ProviderModelFetchOptions,
@@ -310,8 +343,10 @@ export const getProviderModels = async (opts: ProviderModelFetchOptions): Promis
 
 	if (manifest.models_data_source === "endpoint") {
 		models = await fetchModelsFromEndpoint(manifest, opts)
-	} else {
+	} else if (manifest.models_data_source === "models_dev") {
 		models = await fetchModelsFromModelsDev(manifest, opts)
+	} else {
+		throw new Error("Embedded models must be supplied via embedded data, not fetched by URL")
 	}
 
 	modelsCache.set(cacheKey, models)

@@ -178,5 +178,35 @@ describe("ProviderDefinedHandler (mocked)", () => {
 				max_tokens: 4_096,
 			})
 		})
+
+		it("parses embedded provider data without manifest URL", async () => {
+			const embeddedModelsResponse = {
+				models: {
+					[MODEL_ID]: {
+						id: MODEL_ID,
+						name: "Example Model",
+					},
+				},
+			}
+
+			const embeddedJson = JSON.stringify([
+				{
+					name: "Embedded Provider",
+					website: "https://embedded.example.com",
+					baseUrl: "https://embedded.example.com/v1",
+					models_data_source: "embedded" as const,
+				},
+				embeddedModelsResponse,
+			])
+
+			const handler = new ProviderDefinedHandler({
+				providerDefinedModelId: MODEL_ID,
+				providerDefinedEmbeddedJson: embeddedJson,
+			})
+
+			const result = await handler.completePrompt("Embedded completion")
+			expect(result).toContain("Mock non-stream response")
+			expect(handler.getModel().id).toBe(MODEL_ID)
+		})
 	})
 })

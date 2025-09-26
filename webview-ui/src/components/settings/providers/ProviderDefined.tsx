@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useEvent } from "react-use"
-import { VSCodeTextField, VSCodeButton, VSCodeDropdown, VSCodeOption } from "@vscode/webview-ui-toolkit/react"
+import {
+	VSCodeTextField,
+	VSCodeButton,
+	VSCodeDropdown,
+	VSCodeOption,
+	VSCodeRadioGroup,
+	VSCodeRadio,
+} from "@vscode/webview-ui-toolkit/react"
 
 import type { ProviderSettings } from "@roo-code/types"
 import { ModelRecord } from "@roo/api"
@@ -22,6 +29,10 @@ export const ProviderDefined = ({ apiConfiguration, setApiConfigurationField }: 
 	const [fetchError, setFetchError] = useState<string | undefined>()
 	const [hasFetched, setHasFetched] = useState(false)
 
+	const selectedSource =
+		apiConfiguration.providerDefinedSource ||
+		(apiConfiguration.providerDefinedEmbeddedJson ? "embedded" : "manifest")
+
 	const handleInputChange = useCallback(
 		<K extends keyof ProviderSettings, E>(
 			field: K,
@@ -33,11 +44,39 @@ export const ProviderDefined = ({ apiConfiguration, setApiConfigurationField }: 
 		[setApiConfigurationField],
 	)
 
-	const handleFetchModels = useCallback(() => {
-		const manifestUrl = apiConfiguration?.providerDefinedManifestUrl?.trim()
+	useEffect(() => {
+		if (!apiConfiguration.providerDefinedSource) {
+			setApiConfigurationField(
+				"providerDefinedSource",
+				apiConfiguration.providerDefinedEmbeddedJson ? "embedded" : "manifest",
+			)
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [])
 
-		if (!manifestUrl) {
+	const handleSourceChange = useCallback(
+		(event: Event | { target: { value: string } }) => {
+			const value = (event as { target: { value: string } }).target.value as "manifest" | "embedded"
+			setApiConfigurationField("providerDefinedSource", value)
+			setFetchError(undefined)
+			setHasFetched(false)
+			setModels({})
+			setProviderName(undefined)
+		},
+		[setApiConfigurationField],
+	)
+
+	const handleFetchModels = useCallback(() => {
+		const manifestUrl = apiConfiguration?.providerDefinedManifestUrl?.trim() || ""
+		const embeddedJson = apiConfiguration?.providerDefinedEmbeddedJson?.trim() || ""
+
+		if (selectedSource === "manifest" && !manifestUrl) {
 			setFetchError("Manifest URL is required before fetching models.")
+			return
+		}
+
+		if (selectedSource === "embedded" && !embeddedJson) {
+			setFetchError("Embedded JSON must be provided before parsing models.")
 			return
 		}
 
@@ -53,6 +92,8 @@ export const ProviderDefined = ({ apiConfiguration, setApiConfigurationField }: 
 				providerDefinedManifestUrl: manifestUrl,
 				providerDefinedApiKey: apiConfiguration?.providerDefinedApiKey,
 				providerDefinedHeaders: apiConfiguration?.providerDefinedHeaders,
+				providerDefinedEmbeddedJson: embeddedJson || undefined,
+				embeddedData: embeddedJson || undefined,
 				forceRefresh: true,
 			},
 		})
@@ -60,6 +101,8 @@ export const ProviderDefined = ({ apiConfiguration, setApiConfigurationField }: 
 		apiConfiguration?.providerDefinedManifestUrl,
 		apiConfiguration?.providerDefinedApiKey,
 		apiConfiguration?.providerDefinedHeaders,
+		apiConfiguration?.providerDefinedEmbeddedJson,
+		selectedSource,
 	])
 
 	const onMessage = useCallback((event: MessageEvent) => {
@@ -77,7 +120,7 @@ export const ProviderDefined = ({ apiConfiguration, setApiConfigurationField }: 
 				const providerKey = message.values?.provider
 				if (providerKey === "provider-defined") {
 					setIsFetching(false)
-					setFetchError(message.error || "Failed to fetch models for the provided manifest.")
+					setFetchError(message.error || "Failed to process provider data.")
 					setHasFetched(false)
 					setModels({})
 					setProviderName(undefined)
@@ -110,18 +153,57 @@ export const ProviderDefined = ({ apiConfiguration, setApiConfigurationField }: 
 
 	return (
 		<div className="flex flex-col gap-4">
-			<div className="flex gap-2 items-end">
-				<VSCodeTextField
-					value={apiConfiguration?.providerDefinedManifestUrl || ""}
-					onInput={handleInputChange("providerDefinedManifestUrl")}
-					placeholder="https://api.example.com/v1/models?provider=true"
-					className="flex-1">
-					<label className="block font-medium mb-1">Manifest URL</label>
-				</VSCodeTextField>
-				<VSCodeButton appearance="primary" onClick={handleFetchModels} disabled={isFetching}>
-					{isFetching ? "Fetching..." : "Fetch"}
-				</VSCodeButton>
+			<div className="flex flex-col gap-2">
+				<label className="block font-medium">Model Source</label>
+				<VSCodeRadioGroup value={selectedSource} onChange={handleSourceChange}>
+					<VSCodeRadio value="manifest">Manifest URL</VSCodeRadio>
+					<VSCodeRadio value="embedded">Embedded JSON</VSCodeRadio>
+				</VSCodeRadioGroup>
 			</div>
+
+			{selectedSource === "manifest" && (
+				<div className="flex gap-2 items-end">
+					<VSCodeTextField
+						value={apiConfiguration?.providerDefinedManifestUrl || ""}
+						onInput={handleInputChange("providerDefinedManifestUrl")}
+						placeholder="https://api.example.com/v1/models?provider=true"
+						className="flex-1">
+						<label className="block font-medium mb-1">Manifest URL</label>
+					</VSCodeTextField>
+					<VSCodeButton appearance="primary" onClick={handleFetchModels} disabled={isFetching}>
+						{isFetching ? "Fetching..." : "Fetch"}
+					</VSCodeButton>
+				</div>
+			)}
+
+			{selectedSource === "embedded" && (
+				<div className="flex flex-col gap-2">
+					<div className="flex flex-col gap-1">
+						<label className="block font-medium">Embedded Provider JSON</label>
+						<textarea
+							className="w-full min-h-[160px] rounded bg-transparent border border-[var(--vscode-input-border)] p-2 text-sm"
+							placeholder="Paste the embedded provider JSON array here"
+							value={apiConfiguration?.providerDefinedEmbeddedJson || ""}
+							onChange={(event) =>
+								setApiConfigurationField(
+									"providerDefinedEmbeddedJson",
+									(event.target as HTMLTextAreaElement).value,
+								)
+							}
+						/>
+						<div className="text-xs text-vscode-descriptionForeground">
+							If supplied, this embedded JSON is parsed instead of fetching a manifest URL. Provide an
+							array with [providerResponse, extendedModelsResponse].
+						</div>
+					</div>
+					<div>
+						<VSCodeButton appearance="primary" onClick={handleFetchModels} disabled={isFetching}>
+							{isFetching ? "Parsing..." : "Parse"}
+						</VSCodeButton>
+					</div>
+				</div>
+			)}
+
 			{fetchError && <div className="text-sm text-vscode-errorForeground">{fetchError}</div>}
 
 			<VSCodeTextField

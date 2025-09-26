@@ -59,7 +59,10 @@ import { singleCompletionHandler } from "../../utils/single-completion-handler" 
 import { searchCommits } from "../../utils/git"
 import { exportSettings, importSettingsWithFeedback } from "../config/importExport"
 import { getProviderModels as getProviderDefinedModels } from "../../api/providers/provider-defined"
-import { getProviderManifest as getProviderDefinedManifest } from "../../api/providers/fetchers/provider-defined"
+import {
+	getProviderManifest as getProviderDefinedManifest,
+	parseEmbeddedProviderData,
+} from "../../api/providers/fetchers/provider-defined"
 import { getOpenAiModels } from "../../api/providers/openai"
 import { getVsCodeLmModels } from "../../api/providers/vscode-lm"
 import { openMention } from "../mentions"
@@ -979,20 +982,6 @@ export const webviewMessageHandler = async (
 		case "requestProviderDefinedModels": {
 			const { apiConfiguration } = await provider.getState()
 			const values = (message?.values ?? {}) as Record<string, unknown>
-			const manifestValue =
-				values.manifestUrl ?? values.providerDefinedManifestUrl ?? apiConfiguration.providerDefinedManifestUrl
-
-			const manifestUrl = typeof manifestValue === "string" ? manifestValue.trim() : ""
-
-			if (!manifestUrl) {
-				provider.postMessageToWebview({
-					type: "singleRouterModelFetchResponse",
-					success: false,
-					error: "Provider manifest URL is required",
-					values: { provider: "provider-defined" },
-				})
-				break
-			}
 
 			const headersValue =
 				values.headers ?? values.providerDefinedHeaders ?? apiConfiguration.providerDefinedHeaders
@@ -1008,24 +997,53 @@ export const webviewMessageHandler = async (
 
 			const forceRefresh = typeof values.forceRefresh === "boolean" ? values.forceRefresh : true
 
-			try {
-				const manifest = await getProviderDefinedManifest(manifestUrl, {
-					headers: headersCandidate,
-					forceRefresh,
-				})
+			const manifestValue =
+				values.manifestUrl ?? values.providerDefinedManifestUrl ?? apiConfiguration.providerDefinedManifestUrl
+			const manifestUrl = typeof manifestValue === "string" ? manifestValue.trim() : ""
 
-				const models = await getProviderDefinedModels({
-					manifestUrl,
-					apiKey: typeof apiKeyCandidate === "string" ? apiKeyCandidate : undefined,
-					headers: headersCandidate,
-					forceRefresh,
-				})
+			const embeddedValue =
+				values.embeddedData ??
+				values.providerDefinedEmbeddedJson ??
+				apiConfiguration.providerDefinedEmbeddedJson
+			const embeddedData = typeof embeddedValue === "string" ? embeddedValue.trim() : ""
 
+			if (!manifestUrl && !embeddedData) {
 				provider.postMessageToWebview({
-					type: "providerDefinedModels",
-					providerDefinedModels: models,
-					providerDefinedManifest: manifest,
+					type: "singleRouterModelFetchResponse",
+					success: false,
+					error: "Provide a manifest URL or embedded JSON before fetching models",
+					values: { provider: "provider-defined" },
 				})
+				break
+			}
+
+			try {
+				if (embeddedData) {
+					const embedded = parseEmbeddedProviderData(embeddedData)
+					provider.postMessageToWebview({
+						type: "providerDefinedModels",
+						providerDefinedModels: embedded.models,
+						providerDefinedManifest: embedded.manifest,
+					})
+				} else {
+					const manifest = await getProviderDefinedManifest(manifestUrl, {
+						headers: headersCandidate,
+						forceRefresh,
+					})
+
+					const models = await getProviderDefinedModels({
+						manifestUrl,
+						apiKey: typeof apiKeyCandidate === "string" ? apiKeyCandidate : undefined,
+						headers: headersCandidate,
+						forceRefresh,
+					})
+
+					provider.postMessageToWebview({
+						type: "providerDefinedModels",
+						providerDefinedModels: models,
+						providerDefinedManifest: manifest,
+					})
+				}
 			} catch (error) {
 				const errorMessage = error instanceof Error ? error.message : String(error)
 				console.error("Provider-defined models fetch failed:", error)

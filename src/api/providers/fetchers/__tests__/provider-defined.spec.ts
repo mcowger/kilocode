@@ -5,6 +5,7 @@ import {
 	getProviderModels,
 	getProviderModelsFromCache,
 	clearAllProviderDefinedCaches,
+	parseEmbeddedProviderData,
 } from "../provider-defined"
 
 vi.mock("axios")
@@ -155,6 +156,31 @@ describe("provider-defined fetchers", () => {
 			mockedAxios.get.mockClear()
 			await getProviderModels({ manifestUrl })
 			expect(mockedAxios.get).not.toHaveBeenCalled()
+		})
+
+		it("parses embedded provider data", () => {
+			const embeddedModelsResponse = {
+				models: {
+					"example/model-v1": {
+						id: "example/model-v1",
+						name: "Example Model",
+					},
+				},
+			}
+
+			const embeddedJson = JSON.stringify([
+				{
+					name: "Embedded Provider",
+					website: "https://embedded.example.com",
+					baseUrl: "https://embedded.example.com/v1",
+					models_data_source: "embedded" as const,
+				},
+				embeddedModelsResponse,
+			])
+
+			const embedded = parseEmbeddedProviderData(embeddedJson)
+			expect(embedded.manifest.name).toBe("Embedded Provider")
+			expect(Object.keys(embedded.models)).toEqual(["example/model-v1"])
 		})
 	})
 })

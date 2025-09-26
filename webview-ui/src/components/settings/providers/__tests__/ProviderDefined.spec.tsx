@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, act, waitFor } from "@/utils/test-utils"
+import { render, screen, fireEvent, act, waitFor, within } from "@/utils/test-utils"
 
 import type { ProviderSettings } from "@roo-code/types"
 
@@ -39,6 +39,14 @@ vi.mock("@vscode/webview-ui-toolkit/react", () => ({
 		</select>
 	),
 	VSCodeOption: ({ children, value }: any) => <option value={value}>{children}</option>,
+	VSCodeRadioGroup: ({ children, value, onChange }: any) => (
+		<div data-testid="provider-defined-source">
+			<select value={value} onChange={(event) => onChange?.({ target: event.target })}>
+				{children}
+			</select>
+		</div>
+	),
+	VSCodeRadio: ({ children, value }: any) => <option value={value}>{children}</option>,
 }))
 
 describe("ProviderDefined settings", () => {
@@ -46,13 +54,14 @@ describe("ProviderDefined settings", () => {
 		providerDefinedManifestUrl: "",
 		providerDefinedApiKey: "",
 		providerDefinedModelId: "",
+		providerDefinedSource: "manifest",
 	} as ProviderSettings
 
 	beforeEach(() => {
 		mockPostMessage.mockClear()
 	})
 
-	it("shows an error if the user attempts to fetch without a manifest URL", () => {
+	it("shows an error if the user attempts to fetch without details", () => {
 		const setApiConfigurationField = vi.fn()
 
 		render(
@@ -86,6 +95,33 @@ describe("ProviderDefined settings", () => {
 				providerDefinedManifestUrl: configuration.providerDefinedManifestUrl,
 				providerDefinedApiKey: configuration.providerDefinedApiKey,
 				providerDefinedHeaders: configuration.providerDefinedHeaders,
+				providerDefinedEmbeddedJson: undefined,
+				embeddedData: undefined,
+				forceRefresh: true,
+			},
+		})
+	})
+
+	it("allows parsing embedded JSON", () => {
+		const setApiConfigurationField = vi.fn()
+		const configuration = {
+			...baseConfiguration,
+			providerDefinedSource: "embedded",
+			providerDefinedEmbeddedJson: "[{}]",
+		} as ProviderSettings
+
+		render(<ProviderDefined apiConfiguration={configuration} setApiConfigurationField={setApiConfigurationField} />)
+
+		fireEvent.click(screen.getByText("Parse"))
+
+		expect(mockPostMessage).toHaveBeenCalledWith({
+			type: "requestProviderDefinedModels",
+			values: {
+				providerDefinedManifestUrl: "",
+				providerDefinedApiKey: "",
+				providerDefinedHeaders: undefined,
+				providerDefinedEmbeddedJson: configuration.providerDefinedEmbeddedJson,
+				embeddedData: configuration.providerDefinedEmbeddedJson,
 				forceRefresh: true,
 			},
 		})
@@ -100,7 +136,6 @@ describe("ProviderDefined settings", () => {
 
 		render(<ProviderDefined apiConfiguration={configuration} setApiConfigurationField={setApiConfigurationField} />)
 
-		// Dropdown is hidden before fetch results arrive
 		expect(screen.queryByTestId("provider-defined-model-dropdown")).not.toBeInTheDocument()
 
 		await act(async () => {
@@ -127,7 +162,7 @@ describe("ProviderDefined settings", () => {
 			expect(setApiConfigurationField).toHaveBeenCalledWith("providerDefinedModelId", "provider/model-a")
 		})
 
-		const options = screen.getAllByRole("option")
+		const options = within(dropdown as HTMLElement).getAllByRole("option")
 		expect(options.map((option) => option.getAttribute("value"))).toEqual(["provider/model-a", "provider/model-b"])
 	})
 

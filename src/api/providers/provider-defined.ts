@@ -19,6 +19,7 @@ import {
 	getProviderManifest,
 	getProviderModels as fetchProviderModels,
 	getProviderModelsFromCache,
+	parseEmbeddedProviderData,
 	type ProviderManifest,
 } from "./fetchers/provider-defined"
 
@@ -31,17 +32,36 @@ export class ProviderDefinedHandler extends BaseProvider implements SingleComple
 	private manifest?: ProviderManifest
 	private modelCache?: Record<string, ModelInfo>
 	private providerName = DEFAULT_PROVIDER_NAME
+	private embeddedData?: {
+		manifest: ProviderManifest
+		models: Record<string, ModelInfo>
+	}
 
 	constructor(options: ApiHandlerOptions) {
 		super()
 		this.options = options
 		if (!options.providerDefinedManifestUrl) {
-			throw new Error("Provider manifest URL is required for provider-defined integrations")
+			if (!options.providerDefinedEmbeddedJson) {
+				throw new Error("Provider manifest URL or embedded JSON is required for provider-defined integrations")
+			}
+		}
+
+		const embeddedJson = options.providerDefinedEmbeddedJson?.trim()
+		if (embeddedJson) {
+			try {
+				this.embeddedData = parseEmbeddedProviderData(embeddedJson)
+				this.providerName = this.embeddedData.manifest.name || DEFAULT_PROVIDER_NAME
+			} catch (error) {
+				throw new Error(`Invalid embedded provider data: ${(error as Error).message}`)
+			}
 		}
 	}
 
 	private get manifestUrl(): string {
-		return this.options.providerDefinedManifestUrl!
+		if (!this.options.providerDefinedManifestUrl) {
+			throw new Error("Provider manifest URL is not configured")
+		}
+		return this.options.providerDefinedManifestUrl
 	}
 
 	private get userHeaders(): Record<string, string> | undefined {
@@ -77,6 +97,10 @@ export class ProviderDefinedHandler extends BaseProvider implements SingleComple
 	}
 
 	private async ensureManifest(): Promise<ProviderManifest> {
+		if (this.embeddedData) {
+			return this.embeddedData.manifest
+		}
+
 		if (this.manifest) {
 			return this.manifest
 		}
@@ -112,6 +136,11 @@ export class ProviderDefinedHandler extends BaseProvider implements SingleComple
 	}
 
 	private async ensureModels(forceRefresh = false): Promise<Record<string, ModelInfo>> {
+		if (this.embeddedData) {
+			this.modelCache = this.embeddedData.models
+			return this.modelCache
+		}
+
 		if (!forceRefresh && this.modelCache) {
 			return this.modelCache
 		}
@@ -286,7 +315,13 @@ export class ProviderDefinedHandler extends BaseProvider implements SingleComple
 
 	override getModel(): { id: string; info: ModelInfo } {
 		const configuredId = this.options.providerDefinedModelId?.trim()
-		const cachedModels = this.modelCache || getProviderModelsFromCache(this.manifestUrl) || {}
+		const cachedModels = this.embeddedData
+			? this.embeddedData.models
+			: this.modelCache ||
+				(this.options.providerDefinedManifestUrl
+					? getProviderModelsFromCache(this.options.providerDefinedManifestUrl)
+					: undefined) ||
+				{}
 
 		if (configuredId && cachedModels[configuredId]) {
 			return { id: configuredId, info: cachedModels[configuredId] }
