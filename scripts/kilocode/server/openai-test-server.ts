@@ -190,10 +190,11 @@ const server = http.createServer((req: IncomingMessage, res: ServerResponse) => 
 
 		if (provider === "true") {
 			const providerResponse = {
-				name: "Test Provider",
-				website: "https://kilocode.com",
+				name: "Synthetic",
 				baseUrl: `http://localhost:${PORT}/v1`,
 				models_data_source: "endpoint",
+				//models_data_source: "models_dev",
+				models_dev_provider_id: "test",
 			}
 			res.writeHead(200, { "Content-Type": "application/json" })
 			res.end(JSON.stringify(providerResponse))
