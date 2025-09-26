@@ -22,6 +22,8 @@ type ProviderDefinedProps = {
 	setApiConfigurationField: (field: keyof ProviderSettings, value: ProviderSettings[keyof ProviderSettings]) => void
 }
 
+type SourceType = "manifest" | "embedded"
+
 export const ProviderDefined = ({ apiConfiguration, setApiConfigurationField }: ProviderDefinedProps) => {
 	const [models, setModels] = useState<ModelRecord>({})
 	const [providerName, setProviderName] = useState<string | undefined>()
@@ -29,8 +31,8 @@ export const ProviderDefined = ({ apiConfiguration, setApiConfigurationField }: 
 	const [fetchError, setFetchError] = useState<string | undefined>()
 	const [hasFetched, setHasFetched] = useState(false)
 
-	const selectedSource =
-		apiConfiguration.providerDefinedSource ||
+	const selectedSource: SourceType =
+		(apiConfiguration.providerDefinedSource as SourceType | undefined) ||
 		(apiConfiguration.providerDefinedEmbeddedJson ? "embedded" : "manifest")
 
 	const handleInputChange = useCallback(
@@ -48,16 +50,18 @@ export const ProviderDefined = ({ apiConfiguration, setApiConfigurationField }: 
 		if (!apiConfiguration.providerDefinedSource) {
 			setApiConfigurationField(
 				"providerDefinedSource",
-				apiConfiguration.providerDefinedEmbeddedJson ? "embedded" : "manifest",
+				(apiConfiguration.providerDefinedEmbeddedJson
+					? "embedded"
+					: "manifest") as ProviderSettings["providerDefinedSource"],
 			)
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [])
 
 	const handleSourceChange = useCallback(
-		(event: Event | { target: { value: string } }) => {
-			const value = (event as { target: { value: string } }).target.value as "manifest" | "embedded"
-			setApiConfigurationField("providerDefinedSource", value)
+		(event: Event) => {
+			const value = ((event.target as HTMLInputElement | null)?.value as SourceType | undefined) ?? "manifest"
+			setApiConfigurationField("providerDefinedSource", value as ProviderSettings["providerDefinedSource"])
 			setFetchError(undefined)
 			setHasFetched(false)
 			setModels({})
@@ -155,7 +159,7 @@ export const ProviderDefined = ({ apiConfiguration, setApiConfigurationField }: 
 		<div className="flex flex-col gap-4">
 			<div className="flex flex-col gap-2">
 				<label className="block font-medium">Model Source</label>
-				<VSCodeRadioGroup value={selectedSource} onChange={handleSourceChange}>
+				<VSCodeRadioGroup value={selectedSource} onChange={(event) => handleSourceChange(event as Event)}>
 					<VSCodeRadio value="manifest">Manifest URL</VSCodeRadio>
 					<VSCodeRadio value="embedded">Embedded JSON</VSCodeRadio>
 				</VSCodeRadioGroup>

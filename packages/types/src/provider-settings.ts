@@ -230,6 +230,7 @@ const providerDefinedSchema = baseProviderSettingsSchema.extend({
 	providerDefinedApiKey: z.string().optional(),
 	providerDefinedHeaders: z.record(z.string(), z.string()).optional(),
 	providerDefinedEmbeddedJson: z.string().optional(),
+	providerDefinedSource: z.enum(["manifest", "embedded"]).optional(),
 })
 
 const geminiSchema = apiModelIdProviderModelSchema.extend({
