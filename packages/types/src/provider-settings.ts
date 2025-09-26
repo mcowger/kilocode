@@ -138,7 +138,7 @@ export const providerNames = [
 	"mistral",
 	"moonshot",
 	"openai-native",
-  "provider-defined",
+	"provider-defined",
 	"qwen-code",
 	"roo",
 	// kilocode_change start
@@ -656,6 +656,7 @@ export const modelIdKeysByProvider: Record<TypicalProvider, ModelIdKey> = {
 	"vercel-ai-gateway": "vercelAiGatewayModelId",
 	kilocode: "kilocodeModel",
 	"virtual-quota-fallback": "apiModelId",
+	"provider-defined": "providerDefinedModelId",
 }
 
 /**
