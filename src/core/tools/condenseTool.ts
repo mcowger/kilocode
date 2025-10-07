@@ -12,6 +12,9 @@ export const condenseTool = async (
 	removeClosingTag: RemoveClosingTag,
 ) => {
 	const context: string | undefined = block.params.message
+
+	console.debug("[condenseTool] Arguments:", { message: context })
+
 	try {
 		if (block.partial) {
 			await cline.ask("condense", removeClosingTag("message", context), block.partial).catch(() => {})

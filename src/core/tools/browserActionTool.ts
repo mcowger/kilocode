@@ -22,6 +22,8 @@ export async function browserActionTool(
 	const text: string | undefined = block.params.text
 	const size: string | undefined = block.params.size
 
+	console.debug("[browserActionTool] Arguments:", { action, url, coordinate, text, size })
+
 	if (!action || !browserActions.includes(action)) {
 		// checking for action to ensure it is complete and valid
 		if (!block.partial) {

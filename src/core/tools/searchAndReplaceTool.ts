@@ -79,6 +79,16 @@ export async function searchAndReplaceTool(
 	const startLine: number | undefined = block.params.start_line ? parseInt(block.params.start_line, 10) : undefined
 	const endLine: number | undefined = block.params.end_line ? parseInt(block.params.end_line, 10) : undefined
 
+	console.debug("[searchAndReplaceTool] Arguments:", {
+		path: relPath,
+		search,
+		replace,
+		useRegex,
+		ignoreCase,
+		startLine,
+		endLine,
+	})
+
 	try {
 		// Handle partial tool use
 		if (block.partial) {

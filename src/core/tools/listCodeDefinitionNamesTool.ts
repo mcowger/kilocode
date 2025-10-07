@@ -19,6 +19,8 @@ export async function listCodeDefinitionNamesTool(
 ) {
 	const relPath: string | undefined = block.params.path
 
+	console.debug("[listCodeDefinitionNamesTool] Arguments:", { path: relPath })
+
 	// Calculate if the path is outside workspace
 	const absolutePath = relPath ? path.resolve(cline.cwd, relPath) : cline.cwd
 	const isOutsideWorkspace = isPathOutsideWorkspace(absolutePath)

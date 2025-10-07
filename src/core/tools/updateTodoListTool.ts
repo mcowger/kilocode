@@ -168,6 +168,9 @@ export async function updateTodoListTool(
 		pushToolResult("User Edit Succeeded")
 		return
 	}
+
+	console.debug("[updateTodoListTool] Arguments:", { todos: block.params.todos })
+
 	try {
 		const todosRaw = block.params.todos
 

@@ -26,6 +26,8 @@ export async function generateImageTool(
 	const relPath: string | undefined = block.params.path
 	const inputImagePath: string | undefined = block.params.image
 
+	console.debug("[generateImageTool] Arguments:", { prompt, path: relPath, image: inputImagePath })
+
 	// Check if the experiment is enabled
 	const provider = cline.providerRef.deref()
 	const state = await provider?.getState()

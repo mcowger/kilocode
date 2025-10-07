@@ -29,6 +29,12 @@ export async function writeToFileTool(
 	let newContent: string | undefined = block.params.content
 	let predictedLineCount: number | undefined = parseInt(block.params.line_count ?? "0")
 
+	console.debug("[writeToFileTool] Arguments:", {
+		path: relPath,
+		content: newContent?.substring(0, 100) + "...",
+		line_count: predictedLineCount,
+	})
+
 	if (block.partial && (!relPath || newContent === undefined)) {
 		// checking for newContent ensure relPath is complete
 		// wait so we can determine if it's a new file or editing an existing file

@@ -79,6 +79,13 @@ export async function applyDiffTool(
 	const legacyDiffContent: string | undefined = block.params.diff
 	const legacyStartLineStr: string | undefined = block.params.start_line
 
+	console.debug("[applyDiffTool] Arguments:", {
+		args: argsXmlTag?.substring(0, 100) + "...",
+		path: legacyPath,
+		diff: legacyDiffContent?.substring(0, 100) + "...",
+		start_line: legacyStartLineStr,
+	})
+
 	let operationsMap: Record<string, DiffOperation> = {}
 	let usingLegacyParams = false
 	let filteredOperationErrors: string[] = []

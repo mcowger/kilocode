@@ -25,6 +25,7 @@ import {
 	HumanRelayHandler,
 	FakeAIHandler,
 	XAIHandler,
+	TestingToolsHandler,
 	GroqHandler,
 	HuggingFaceHandler,
 	ChutesHandler,
@@ -155,6 +156,8 @@ export function buildApiHandler(configuration: ProviderSettings): ApiHandler {
 			return new FakeAIHandler(options)
 		case "xai":
 			return new XAIHandler(options)
+		case "testing-tools":
+			return new TestingToolsHandler(options)
 		case "groq":
 			return new GroqHandler(options)
 		case "deepinfra":

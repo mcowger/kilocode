@@ -25,6 +25,8 @@ export async function applyDiffToolLegacy(
 	const relPath: string | undefined = block.params.path
 	let diffContent: string | undefined = block.params.diff
 
+	console.debug("[applyDiffToolLegacy] Arguments:", { path: relPath, diff: diffContent?.substring(0, 100) + "..." })
+
 	if (diffContent && !cline.api.getModel().id.includes("claude")) {
 		diffContent = unescapeHtmlEntities(diffContent)
 	}

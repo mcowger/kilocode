@@ -14,6 +14,8 @@ export async function fetchInstructionsTool(
 	const task: string | undefined = block.params.task
 	const sharedMessageProps: ClineSayTool = { tool: "fetchInstructions", content: task }
 
+	console.debug("[fetchInstructionsTool] Arguments:", { task })
+
 	try {
 		if (block.partial) {
 			const partialMessage = JSON.stringify({ ...sharedMessageProps, content: undefined } satisfies ClineSayTool)

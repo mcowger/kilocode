@@ -3,6 +3,18 @@ import { TextContent, ToolUse, ToolParamName, toolParamNames } from "../../share
 import { AssistantMessageContent } from "./parseAssistantMessage"
 
 /**
+ * Represents a native tool call from OpenAI-compatible APIs
+ */
+interface NativeToolCall {
+	id?: string
+	type?: string
+	function?: {
+		name: string
+		arguments: string // JSON string (may be partial during streaming)
+	}
+}
+
+/**
  * Parser for assistant messages. Maintains state between chunks
  * to avoid reprocessing the entire message on each update.
  */
@@ -17,6 +29,10 @@ export class AssistantMessageParser {
 	private readonly MAX_ACCUMULATOR_SIZE = 1024 * 1024 // 1MB limit
 	private readonly MAX_PARAM_LENGTH = 1024 * 100 // 100KB per parameter limit
 	private accumulator = ""
+
+	// State for accumulating native tool calls
+	private nativeToolCallsAccumulator: Map<string, NativeToolCall> = new Map()
+	private processedNativeToolCallIds: Set<string> = new Set()
 
 	/**
 	 * Initialize a new AssistantMessageParser instance.
@@ -37,6 +53,8 @@ export class AssistantMessageParser {
 		this.currentParamName = undefined
 		this.currentParamValueStartIndex = 0
 		this.accumulator = ""
+		this.nativeToolCallsAccumulator.clear()
+		this.processedNativeToolCallIds.clear()
 	}
 
 	/**
@@ -47,6 +65,161 @@ export class AssistantMessageParser {
 		// Return a shallow copy to prevent external mutation
 		return this.contentBlocks.slice()
 	}
+
+	/**
+	 * Recursively parse any string values that appear to be JSON-encoded.
+	 * This handles cases where the model double-encodes parameters.
+	 *
+	 * @param obj - The object to process
+	 * @returns The object with any double-encoded strings parsed
+	 */
+	private parseDoubleEncodedParams(obj: any): any {
+		if (obj === null || obj === undefined) {
+			return obj
+		}
+
+		// If it's a string that looks like JSON, try to parse it
+		if (typeof obj === "string") {
+			const trimmed = obj.trim()
+			if (
+				(trimmed.startsWith("{") && trimmed.endsWith("}")) ||
+				(trimmed.startsWith("[") && trimmed.endsWith("]"))
+			) {
+				try {
+					const parsed = JSON.parse(obj)
+					// Recursively process the parsed value in case it has more double-encoding
+					// console.debug("[AssistantMessageParser] Parsed double-encoded JSON:", JSON.stringify(parsed))
+					return this.parseDoubleEncodedParams(parsed)
+				} catch {
+					// Not valid JSON, return as-is
+					return obj
+				}
+			}
+			return obj
+		}
+
+		// If it's an array, recursively process each element
+		if (Array.isArray(obj)) {
+			return obj.map((item) => this.parseDoubleEncodedParams(item))
+		}
+
+		// If it's an object, recursively process each property
+		if (typeof obj === "object") {
+			const result: Record<string, any> = {}
+			for (const [key, value] of Object.entries(obj)) {
+				result[key] = this.parseDoubleEncodedParams(value)
+			}
+			return result
+		}
+
+		// Primitive types (number, boolean, etc.) return as-is
+		return obj
+	}
+
+	/**
+	 * Process native OpenAI-format tool calls and convert them to internal ToolUse format.
+	 * This handles tool calls that come from OpenAI-compatible APIs in their native format
+	 * rather than embedded as XML in text content.
+	 *
+	 * Native tool calls stream in as deltas, so this method accumulates them until complete.
+	 *
+	 * @param toolCalls Array of native tool call objects (may be partial during streaming).  We
+	 * currently set parallel_tool_calls to false, so in theory there should only be 1 call.
+	 */
+	public processNativeToolCalls(toolCalls: NativeToolCall[]): void {
+		for (const toolCall of toolCalls) {
+			// Tool calls must have at least a function name
+			if (!toolCall.function?.name) {
+				console.warn("[AssistantMessageParser] Skipping tool call without function name:", toolCall)
+				continue
+			}
+
+			const toolCallId = toolCall.id || toolCall.function.name
+			const toolName = toolCall.function.name
+
+			// Validate that this is a recognized tool name
+			if (!toolNames.includes(toolName as ToolName)) {
+				console.warn("[AssistantMessageParser] Unknown tool name in native call:", toolName)
+				continue
+			}
+
+			// Check if we've already processed this tool call
+			if (this.processedNativeToolCallIds.has(toolCallId)) {
+				continue
+			}
+
+			// Get or create the accumulator entry for this tool call
+			let accumulatedCall = this.nativeToolCallsAccumulator.get(toolCallId)
+			if (!accumulatedCall) {
+				accumulatedCall = {
+					id: toolCall.id,
+					type: toolCall.type,
+					function: {
+						name: toolCall.function.name,
+						arguments: toolCall.function.arguments || "",
+					},
+				}
+				this.nativeToolCallsAccumulator.set(toolCallId, accumulatedCall)
+			} else {
+				// Append new argument chunks to existing arguments
+				accumulatedCall.function!.arguments += toolCall.function.arguments || ""
+			}
+
+			// Try to parse the arguments - if successful, the tool call is complete
+			let isComplete = false
+			let parsedArgs: Record<string, any> = {}
+
+			try {
+				if (accumulatedCall.function!.arguments.trim()) {
+					parsedArgs = JSON.parse(accumulatedCall.function!.arguments)
+
+					// Fix any double-encoded parameters
+					parsedArgs = this.parseDoubleEncodedParams(parsedArgs)
+
+					isComplete = true
+				}
+			} catch (error) {
+				// Arguments are not yet complete valid JSON, continue accumulating
+				// console.debug("[AssistantMessageParser] Accumulating partial native tool call:", {
+				// 	toolName,
+				// 	argsLength: accumulatedCall.function!.arguments.length,
+				// 	argsPreview: accumulatedCall.function!.arguments.substring(0, 50),
+				// })
+				continue
+			}
+
+			// Tool call is complete - convert it to ToolUse format
+			if (isComplete) {
+				// Finalize any current text content before adding tool use
+				if (this.currentTextContent) {
+					this.currentTextContent.partial = false
+					this.currentTextContent = undefined
+				}
+
+				// Create a ToolUse block from the native tool call
+				const toolUse: ToolUse = {
+					type: "tool_use",
+					name: toolName as ToolName,
+					params: parsedArgs,
+					partial: false, // Now complete after accumulation
+				}
+
+				// Add the tool use to content blocks
+				this.contentBlocks.push(toolUse)
+
+				// Mark this tool call as processed
+				this.processedNativeToolCallIds.add(toolCallId)
+				this.nativeToolCallsAccumulator.delete(toolCallId)
+
+				// console.debug("[AssistantMessageParser] Converted complete native tool call:", {
+				// 	toolName,
+				// 	paramCount: Object.keys(parsedArgs).length,
+				// 	params: parsedArgs,
+				// })
+			}
+		}
+	}
+
 	/**
 	 * Process a new chunk of text and update the parser state.
 	 * @param chunk The new chunk of text to process.

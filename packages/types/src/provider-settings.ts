@@ -25,6 +25,7 @@ import {
 	vertexModels,
 	vscodeLlmModels,
 	xaiModels,
+	testingToolsModels,
 	internationalZAiModels,
 } from "./providers/index.js"
 
@@ -144,6 +145,7 @@ export const providerNames = [
 	"synthetic",
 	// kilocode_change end
 	"sambanova",
+	"testing-tools",
 	"vertex",
 	"xai",
 	"zai",
@@ -369,6 +371,16 @@ const xaiSchema = apiModelIdProviderModelSchema.extend({
 	xaiApiKey: z.string().optional(),
 })
 
+const testingToolsSchema = apiModelIdProviderModelSchema.extend({
+	testingToolsApiKey: z.string().optional(),
+	testingToolsBaseUrl: z.string().optional(),
+	testingToolsModelSlug: z.string().optional(),
+	testingToolsContextWindow: z.number().int().min(1).optional(),
+	testingToolsMaxTokens: z.number().int().min(1).optional(),
+	testingToolsSystemPromptOverride: z.string().optional(),
+	testingToolsToolsJson: z.string().optional(),
+})
+
 const groqSchema = apiModelIdProviderModelSchema.extend({
 	groqApiKey: z.string().optional(),
 })
@@ -498,6 +510,7 @@ export const providerSettingsSchemaDiscriminated = z.discriminatedUnion("apiProv
 	humanRelaySchema.merge(z.object({ apiProvider: z.literal("human-relay") })),
 	fakeAiSchema.merge(z.object({ apiProvider: z.literal("fake-ai") })),
 	xaiSchema.merge(z.object({ apiProvider: z.literal("xai") })),
+	testingToolsSchema.merge(z.object({ apiProvider: z.literal("testing-tools") })),
 	// kilocode_change start
 	geminiCliSchema.merge(z.object({ apiProvider: z.literal("gemini-cli") })),
 	kilocodeSchema.merge(z.object({ apiProvider: z.literal("kilocode") })),
@@ -550,6 +563,7 @@ export const providerSettingsSchema = z.object({
 	...humanRelaySchema.shape,
 	...fakeAiSchema.shape,
 	...xaiSchema.shape,
+	...testingToolsSchema.shape,
 	...groqSchema.shape,
 	...huggingFaceSchema.shape,
 	...chutesSchema.shape,
@@ -638,6 +652,7 @@ export const modelIdKeysByProvider: Record<TypicalProvider, ModelIdKey> = {
 	unbound: "unboundModelId",
 	requesty: "requestyModelId",
 	xai: "apiModelId",
+	"testing-tools": "apiModelId",
 	groq: "apiModelId",
 	chutes: "apiModelId",
 	litellm: "litellmModelId",
@@ -763,6 +778,11 @@ export const MODELS_BY_PROVIDER: Record<
 		id: "sambanova",
 		label: "SambaNova",
 		models: Object.keys(sambaNovaModels),
+	},
+	"testing-tools": {
+		id: "testing-tools",
+		label: "Testing Tools",
+		models: Object.keys(testingToolsModels),
 	},
 	vertex: {
 		id: "vertex",

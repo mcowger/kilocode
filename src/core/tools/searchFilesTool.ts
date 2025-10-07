@@ -19,6 +19,8 @@ export async function searchFilesTool(
 	const regex: string | undefined = block.params.regex
 	const filePattern: string | undefined = block.params.file_pattern
 
+	console.debug("[searchFilesTool] Arguments:", { path: relDirPath, regex, file_pattern: filePattern })
+
 	const absolutePath = relDirPath ? path.resolve(cline.cwd, relDirPath) : cline.cwd
 	const isOutsideWorkspace = isPathOutsideWorkspace(absolutePath)
 

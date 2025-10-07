@@ -52,6 +52,8 @@ import {
 	fireworksDefaultModelId,
 	syntheticModels, // kilocode_change
 	syntheticDefaultModelId, // kilocode_change
+	testingToolsModels,
+	testingToolsDefaultModelId,
 	featherlessModels,
 	featherlessDefaultModelId,
 	ioIntelligenceDefaultModelId,
@@ -442,6 +444,11 @@ function getSelectedModel({
 		case "vercel-ai-gateway": {
 			const id = apiConfiguration.vercelAiGatewayModelId ?? vercelAiGatewayDefaultModelId
 			const info = routerModels["vercel-ai-gateway"]?.[id]
+			return { id, info }
+		}
+		case "testing-tools": {
+			const id = apiConfiguration.apiModelId ?? testingToolsDefaultModelId
+			const info = testingToolsModels[id as keyof typeof testingToolsModels]
 			return { id, info }
 		}
 		// case "anthropic":

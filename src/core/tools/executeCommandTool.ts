@@ -31,6 +31,8 @@ export async function executeCommandTool(
 	let command: string | undefined = block.params.command
 	const customCwd: string | undefined = block.params.cwd
 
+	console.debug("[executeCommandTool] Arguments:", { command, cwd: customCwd })
+
 	try {
 		if (block.partial) {
 			await task.ask("command", removeClosingTag("command", command), block.partial).catch(() => {})

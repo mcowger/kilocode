@@ -17,6 +17,8 @@ export async function reportBugTool(
 	const title = block.params.title
 	const description = block.params.description
 
+	console.debug("[reportBugTool] Arguments:", { title, description })
+
 	try {
 		if (block.partial) {
 			await cline

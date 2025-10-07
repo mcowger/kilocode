@@ -14,6 +14,8 @@ export async function askFollowupQuestionTool(
 	const question: string | undefined = block.params.question
 	const follow_up: string | undefined = block.params.follow_up
 
+	console.debug("[askFollowupQuestionTool] Arguments:", { question, follow_up })
+
 	try {
 		if (block.partial) {
 			await cline.ask("followup", removeClosingTag("question", question), block.partial).catch(() => {})
@@ -33,7 +35,24 @@ export async function askFollowupQuestionTool(
 				suggest: [] as Suggest[],
 			}
 
-			if (follow_up) {
+			// Handle native tool call format (follow_up is already parsed as an array by parseDoubleEncodedParams)
+			if ("follow_up" in block.params && Array.isArray(block.params.follow_up)) {
+				console.debug("[askFollowupQuestionTool] Processing native follow_up array from tool call")
+
+				const followUpArray = block.params.follow_up as Array<{ text?: string; mode?: string }>
+
+				follow_up_json.suggest = followUpArray.map((item) => {
+					const result: Suggest = { answer: item.text || "" }
+					if (item.mode) {
+						result.mode = item.mode
+					}
+					return result
+				})
+			}
+			// Handle XML format (legacy)
+			else if (follow_up) {
+				console.debug("[askFollowupQuestionTool] Processing XML follow_up format")
+
 				// Define the actual structure returned by the XML parser
 				type ParsedSuggestion = string | { "#text": string; "@_mode"?: string }
 

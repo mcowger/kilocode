@@ -23,6 +23,7 @@ import {
 	internationalZAiModels,
 	fireworksModels,
 	syntheticModels, // kilocode_change
+	testingToolsModels,
 	rooModels,
 	featherlessModels,
 } from "@roo-code/types"
@@ -50,6 +51,7 @@ export const MODELS_BY_PROVIDER: Partial<Record<ProviderName, Record<string, Mod
 	zai: internationalZAiModels,
 	fireworks: fireworksModels,
 	synthetic: syntheticModels, // kilocode_change
+	"testing-tools": testingToolsModels,
 	roo: rooModels,
 	featherless: featherlessModels,
 }
@@ -90,6 +92,7 @@ export const PROVIDERS = [
 	{ value: "zai", label: "Z AI" },
 	{ value: "fireworks", label: "Fireworks AI" },
 	{ value: "synthetic", label: "Synthetic" }, // kilocode_change
+	{ value: "testing-tools", label: "Testing Tools" },
 	{ value: "featherless", label: "Featherless AI" },
 	{ value: "io-intelligence", label: "IO Intelligence" },
 	// kilocode_change start

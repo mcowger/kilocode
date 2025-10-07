@@ -2036,12 +2036,80 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 									pendingGroundingSources.push(...chunk.sources)
 								}
 								break
+							case "native_tool_calls": {
+								// Handle native OpenAI-format tool calls
+								// console.debug("[Task#recursivelyMakeClineRequests] Received native tool calls:", {
+								// 	count: chunk.toolCalls.length,
+								// 	tools: chunk.toolCalls.map(tc => tc.function?.name).filter(Boolean),
+								// })
+
+								// Process native tool calls through the parser
+								this.assistantMessageParser.processNativeToolCalls(chunk.toolCalls)
+
+								// Update content blocks after processing native tool calls
+								const prevLength = this.assistantMessageContent.length
+								this.assistantMessageContent = this.assistantMessageParser.getContentBlocks()
+
+								if (this.assistantMessageContent.length > prevLength) {
+									const newBlocks = this.assistantMessageContent.slice(prevLength)
+									// console.debug("[Task#recursivelyMakeClineRequests] Native tool calls converted to blocks:", {
+									// 	prevLength,
+									// 	newLength: this.assistantMessageContent.length,
+									// 	newBlocks: newBlocks.map((block) => ({
+									// 		type: block.type,
+									// 		partial: block.partial,
+									// 		...(block.type === "tool_use"
+									// 			? {
+									// 				name: block.name,
+									// 				paramsKeys: Object.keys(block.params || {}),
+									// 			}
+									// 			: {}),
+									// 	})),
+									// })
+
+									// New content we need to present
+									this.userMessageContentReady = false
+								}
+
+								// Present content to user
+								presentAssistantMessage(this)
+								break
+							}
 							case "text": {
 								assistantMessage += chunk.text
+
+								// kilocode_change start: Log tool call responses for debugging
+								// console.debug("[Task#recursivelyMakeClineRequests] Received text chunk:", {
+								// 	chunkLength: chunk.text.length,
+								// 	chunkText: chunk.text,
+								// 	assistantMessageLength: assistantMessage.length,
+								// })
+								// kilocode_change end
 
 								// Parse raw assistant message chunk into content blocks.
 								const prevLength = this.assistantMessageContent.length
 								this.assistantMessageContent = this.assistantMessageParser.processChunk(chunk.text)
+
+								// kilocode_change start: Log parsed content blocks for debugging
+								if (this.assistantMessageContent.length > prevLength) {
+									const newBlocks = this.assistantMessageContent.slice(prevLength)
+									// console.debug("[Task#recursivelyMakeClineRequests] New content blocks parsed:", {
+									// 	prevLength,
+									// 	newLength: this.assistantMessageContent.length,
+									// 	newBlocks: newBlocks.map((block) => ({
+									// 		type: block.type,
+									// 		partial: block.partial,
+									// 		...(block.type === "tool_use"
+									// 			? {
+									// 				name: block.name,
+									// 				paramsKeys: Object.keys(block.params || {}),
+									// 			}
+									// 			: {}),
+									// 		...(block.type === "text" ? { contentLength: block.content?.length || 0 } : {}),
+									// 	})),
+									// })
+								}
+								// kilocode_change end
 
 								if (this.assistantMessageContent.length > prevLength) {
 									// New content we need to present, reset to
@@ -2351,7 +2419,17 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				// able to save the assistant's response.
 				let didEndLoop = false
 
-				if (assistantMessage.length > 0) {
+				// kilocode_change start: Check for tool use before determining if response is empty
+				const didToolUse = this.assistantMessageContent.some((block) => block.type === "tool_use")
+				console.debug("[Task#recursivelyMakeClineRequests] Response complete:", {
+					hasText: assistantMessage.length > 0,
+					didToolUse,
+					contentBlocks: this.assistantMessageContent.length,
+				})
+				// kilocode_change end
+
+				if (assistantMessage.length > 0 || didToolUse) {
+					// kilocode_change: also check for tool use
 					// Display grounding sources to the user if they exist
 					if (pendingGroundingSources.length > 0) {
 						const citationLinks = pendingGroundingSources.map((source, i) => `[${i + 1}](${source.url})`)
@@ -2389,7 +2467,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 
 					// If the model did not tool use, then we need to tell it to
 					// either use a tool or attempt_completion.
-					const didToolUse = this.assistantMessageContent.some((block) => block.type === "tool_use")
+					// kilocode_change: moved didToolUse calculation above
 
 					if (!didToolUse) {
 						this.userMessageContent.push({ type: "text", text: formatResponse.noToolsUsed() })

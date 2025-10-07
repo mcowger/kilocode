@@ -8,6 +8,7 @@ export * from "./doubao.js"
 export * from "./featherless.js"
 export * from "./fireworks.js"
 export * from "./synthetic.js" // kilocode_change
+export * from "./testing-tools.js"
 export * from "./gemini.js"
 // kilocode_change start
 export * from "./gemini-cli.js"

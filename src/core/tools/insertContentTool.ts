@@ -25,6 +25,12 @@ export async function insertContentTool(
 	const line: string | undefined = block.params.line
 	const content: string | undefined = block.params.content
 
+	console.debug("[insertContentTool] Arguments:", {
+		path: relPath,
+		line,
+		content: content?.substring(0, 100) + "...",
+	})
+
 	const sharedMessageProps: ClineSayTool = {
 		tool: "insertContent",
 		path: getReadablePath(cline.cwd, removeClosingTag("path", relPath)),

@@ -34,6 +34,7 @@ import {
 	mainlandZAiDefaultModelId,
 	fireworksDefaultModelId,
 	syntheticDefaultModelId, // kilocode_change
+	testingToolsDefaultModelId,
 	featherlessDefaultModelId,
 	ioIntelligenceDefaultModelId,
 	rooDefaultModelId,
@@ -98,6 +99,7 @@ import {
 	GeminiCli,
 	VirtualQuotaFallbackProvider,
 	Synthetic,
+	TestingTools,
 	// kilocode_change end
 	ZAi,
 	Fireworks,
@@ -108,7 +110,7 @@ import {
 
 import { MODELS_BY_PROVIDER, PROVIDERS } from "./constants"
 import { inputEventTransform, noTransform } from "./transforms"
-// import { ModelPicker } from "./ModelPicker" // kilocode_change
+// import { ModelPicker } // kilocode_change
 import { ModelInfoView } from "./ModelInfoView"
 import { ApiErrorMessage } from "./ApiErrorMessage"
 import { ThinkingBudget } from "./ThinkingBudget"
@@ -380,6 +382,7 @@ const ApiOptions = ({
 				},
 				fireworks: { field: "apiModelId", default: fireworksDefaultModelId },
 				synthetic: { field: "apiModelId", default: syntheticDefaultModelId }, // kilocode_change
+				"testing-tools": { field: "apiModelId", default: testingToolsDefaultModelId },
 				featherless: { field: "apiModelId", default: featherlessDefaultModelId },
 				"io-intelligence": { field: "ioIntelligenceModelId", default: ioIntelligenceDefaultModelId },
 				roo: { field: "apiModelId", default: rooDefaultModelId },
@@ -756,6 +759,10 @@ const ApiOptions = ({
 
 			{selectedProvider === "featherless" && (
 				<Featherless apiConfiguration={apiConfiguration} setApiConfigurationField={setApiConfigurationField} />
+			)}
+
+			{selectedProvider === "testing-tools" && (
+				<TestingTools apiConfiguration={apiConfiguration} setApiConfigurationField={setApiConfigurationField} />
 			)}
 
 			{selectedProviderModels.length > 0 && (

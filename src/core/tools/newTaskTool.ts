@@ -23,6 +23,8 @@ export async function newTaskTool(
 	const message: string | undefined = block.params.message
 	const todos: string | undefined = block.params.todos
 
+	console.debug("[newTaskTool] Arguments:", { mode, message, todos })
+
 	try {
 		if (block.partial) {
 			const partialMessage = JSON.stringify({

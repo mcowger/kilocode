@@ -90,6 +90,12 @@ export async function editFileTool(
 	const instructions: string | undefined = block.params.instructions
 	const code_edit: string | undefined = block.params.code_edit
 
+	console.debug("[editFileTool] Arguments:", {
+		target_file,
+		instructions,
+		code_edit: code_edit?.substring(0, 100) + "...",
+	})
+
 	let fileExists = true
 	try {
 		if (block.partial && (!target_file || instructions === undefined)) {

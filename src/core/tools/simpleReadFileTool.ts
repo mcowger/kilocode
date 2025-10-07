@@ -41,6 +41,8 @@ export async function simpleReadFileTool(
 ) {
 	const filePath: string | undefined = block.params.path
 
+	console.debug("[simpleReadFileTool] Arguments:", { path: filePath })
+
 	// Check if the current model supports images
 	const modelInfo = cline.api.getModel().info
 	const supportsImages = modelInfo.supportsImages ?? false

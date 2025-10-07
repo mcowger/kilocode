@@ -5,6 +5,7 @@ export type ApiStreamChunk =
 	| ApiStreamUsageChunk
 	| ApiStreamReasoningChunk
 	| ApiStreamGroundingChunk
+	| ApiStreamNativeToolCallsChunk
 	| ApiStreamError
 
 export interface ApiStreamError {
@@ -36,6 +37,18 @@ export interface ApiStreamUsageChunk {
 export interface ApiStreamGroundingChunk {
 	type: "grounding"
 	sources: GroundingSource[]
+}
+
+export interface ApiStreamNativeToolCallsChunk {
+	type: "native_tool_calls"
+	toolCalls: Array<{
+		id?: string
+		type?: string
+		function?: {
+			name: string
+			arguments: string // JSON string
+		}
+	}>
 }
 
 export interface GroundingSource {

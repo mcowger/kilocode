@@ -32,6 +32,7 @@ export { ZAi } from "./ZAi"
 export { LiteLLM } from "./LiteLLM"
 export { Fireworks } from "./Fireworks"
 export { Synthetic } from "./Synthetic" // kilocode_change
+export { TestingTools } from "./TestingTools"
 export { Featherless } from "./Featherless"
 export { VercelAiGateway } from "./VercelAiGateway"
 export { DeepInfra } from "./DeepInfra"

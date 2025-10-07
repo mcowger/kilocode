@@ -14,6 +14,8 @@ export async function accessMcpResourceTool(
 	const server_name: string | undefined = block.params.server_name
 	const uri: string | undefined = block.params.uri
 
+	console.debug("[accessMcpResourceTool] Arguments:", { server_name, uri })
+
 	try {
 		if (block.partial) {
 			const partialMessage = JSON.stringify({

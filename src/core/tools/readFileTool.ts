@@ -47,6 +47,21 @@ export function getReadFileToolDescription(blockName: string, blockParams: any):
 			console.error("Failed to parse read_file args XML for description:", error)
 			return `[${blockName} with unparsable args]`
 		}
+	} else if ("files" in blockParams && Array.isArray(blockParams.files)) {
+		// Handle native files array format
+		const filesArray = blockParams.files as Array<{ path?: string }>
+		const paths = filesArray.map((f) => f?.path).filter(Boolean) as string[]
+
+		if (paths.length === 0) {
+			return `[${blockName} with no valid paths]`
+		} else if (paths.length === 1) {
+			return `[${blockName} for '${paths[0]}'. Reading multiple files at once is more efficient for the LLM. If other files are relevant to your current task, please read them simultaneously.]`
+		} else if (paths.length <= 3) {
+			const pathList = paths.map((p) => `'${p}'`).join(", ")
+			return `[${blockName} for ${pathList}]`
+		} else {
+			return `[${blockName} for ${paths.length} files]`
+		}
 	} else if (blockParams.path) {
 		// Fallback for legacy single-path usage
 		// Modified part for single file (legacy)
@@ -92,6 +107,13 @@ export async function readFileTool(
 	const legacyPath: string | undefined = block.params.path
 	const legacyStartLineStr: string | undefined = block.params.start_line
 	const legacyEndLineStr: string | undefined = block.params.end_line
+
+	console.debug("[readFileTool] Arguments:", {
+		args: argsXmlTag?.substring(0, 100) + "...",
+		path: legacyPath,
+		start_line: legacyStartLineStr,
+		end_line: legacyEndLineStr,
+	})
 
 	// Check if the current model supports images at the beginning
 	const modelInfo = cline.api.getModel().info
@@ -159,6 +181,36 @@ export async function readFileTool(
 			await handleError("parsing read_file args", new Error(errorMessage))
 			pushToolResult(`<files><error>${errorMessage}</error></files>`)
 			return
+		}
+	} else if ("files" in block.params && Array.isArray(block.params.files)) {
+		// Handle native files array from native tool calls (OpenAI format)
+		console.debug("[readFileTool] Processing native files array from tool call")
+
+		const filesArray = block.params.files as Array<{ path?: string; line_ranges?: string[] }>
+
+		for (const file of filesArray) {
+			if (!file || typeof file !== "object") continue
+			if (!file.path) continue // Skip if no path in a file entry
+
+			const fileEntry: FileEntry = {
+				path: file.path,
+				lineRanges: [],
+			}
+
+			// Handle line_ranges array
+			if (file.line_ranges && Array.isArray(file.line_ranges)) {
+				for (const range of file.line_ranges) {
+					if (!range || typeof range !== "string") continue
+					const match = range.match(/(\d+)-(\d+)/)
+					if (match) {
+						const [, start, end] = match.map(Number)
+						if (!isNaN(start) && !isNaN(end)) {
+							fileEntry.lineRanges?.push({ start, end })
+						}
+					}
+				}
+			}
+			fileEntries.push(fileEntry)
 		}
 	} else if (legacyPath) {
 		// Handle legacy single file path as a fallback

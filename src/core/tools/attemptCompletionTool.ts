@@ -45,6 +45,8 @@ export async function attemptCompletionTool(
 	const result: string | undefined = block.params.result
 	const command: string | undefined = block.params.command
 
+	console.debug("[attemptCompletionTool] Arguments:", { result, command })
+
 	// Get the setting for preventing completion with open todos from VSCode configuration
 	const preventCompletionWithOpenTodos = vscode.workspace
 		.getConfiguration(Package.name)

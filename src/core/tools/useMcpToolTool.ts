@@ -292,6 +292,8 @@ export async function useMcpToolTool(
 			arguments: block.params.arguments,
 		}
 
+		console.debug("[useMcpToolTool] Arguments:", params)
+
 		// Handle partial requests
 		if (block.partial) {
 			await handlePartialRequest(cline, params, removeClosingTag)

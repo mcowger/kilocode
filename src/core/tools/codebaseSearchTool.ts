@@ -29,6 +29,8 @@ export async function codebaseSearchTool(
 	let query: string | undefined = block.params.query
 	let directoryPrefix: string | undefined = block.params.path
 
+	console.debug("[codebaseSearchTool] Arguments:", { query, path: directoryPrefix })
+
 	query = removeClosingTag("query", query)
 
 	if (directoryPrefix) {

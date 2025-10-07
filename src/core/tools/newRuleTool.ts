@@ -22,6 +22,8 @@ export async function newRuleTool(
 	const relPath: string | undefined = block.params.path
 	let newContent: string | undefined = block.params.content
 
+	console.debug("[newRuleTool] Arguments:", { path: relPath, content: newContent?.substring(0, 100) + "..." })
+
 	if (!relPath || !newContent) {
 		// checking for newContent ensure relPath is complete
 		// wait so we can determine if it's a new file or editing an existing file

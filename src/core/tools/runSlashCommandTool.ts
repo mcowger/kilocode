@@ -29,6 +29,8 @@ export async function runSlashCommandTool(
 	const commandName: string | undefined = block.params.command
 	const args: string | undefined = block.params.args
 
+	console.debug("[runSlashCommandTool] Arguments:", { command: commandName, args })
+
 	try {
 		if (block.partial) {
 			const partialMessage = JSON.stringify({

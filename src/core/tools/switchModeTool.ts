@@ -16,6 +16,8 @@ export async function switchModeTool(
 	const mode_slug: string | undefined = block.params.mode_slug
 	const reason: string | undefined = block.params.reason
 
+	console.debug("[switchModeTool] Arguments:", { mode_slug, reason })
+
 	try {
 		if (block.partial) {
 			const partialMessage = JSON.stringify({
