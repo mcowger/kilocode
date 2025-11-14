@@ -68,8 +68,8 @@ export class OpenRouterEmbedder implements IEmbedder {
 				baseURL: this.baseUrl,
 				apiKey: apiKey,
 				defaultHeaders: {
-					"HTTP-Referer": "https://github.com/RooCodeInc/Roo-Code",
-					"X-Title": "Roo Code",
+					"HTTP-Referer": "https://kilocode.ai", //kilocode_change
+					"X-Title": "Kilo Code", //kilocode_change
 				},
 			})
 		} catch (error) {
