@@ -49,3 +49,35 @@ export function createDualLogger(outputChannelLog: LogFunction): LogFunction {
 		console.log(...args)
 	}
 }
+
+export function createDualDebugLogger(outputChannelLog: LogFunction): LogFunction {
+	return (...args: unknown[]) => {
+		const debugMode = vscode.workspace.getConfiguration("kilo-code").get<boolean>("debugMode") ?? false
+		if (debugMode) {
+			outputChannelLog(...args)
+			console.debug(...args)
+		}
+		// If debugMode is false, do nothing (implicit return)
+	}
+}
+
+/**
+ * DebugLogger class that creates and exports a singleton logger
+ * Using createDualDebugLogger() for conditional dual output to both output channel and console
+ */
+class DebugLogger {
+	private static instance: LogFunction
+
+	private constructor() {}
+
+	public static getLogger(): LogFunction {
+		if (!DebugLogger.instance) {
+			const outputChannel = vscode.window.createOutputChannel("Debug Logger")
+			const outputChannelLogger = createOutputChannelLogger(outputChannel)
+			DebugLogger.instance = createDualDebugLogger(outputChannelLogger)
+		}
+		return DebugLogger.instance
+	}
+}
+
+export const debugLogger = DebugLogger.getLogger()
