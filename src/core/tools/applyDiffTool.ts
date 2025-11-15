@@ -13,6 +13,7 @@ import { fileExistsAtPath } from "../../utils/fs"
 import { RecordSource } from "../context-tracking/FileContextTrackerTypes"
 import { unescapeHtmlEntities } from "../../utils/text-normalization"
 import { EXPERIMENT_IDS, experiments } from "../../shared/experiments"
+import { debugLogger } from "../../utils/outputChannelLogger"
 
 export async function applyDiffToolLegacy(
 	cline: Task,
@@ -58,6 +59,10 @@ export async function applyDiffToolLegacy(
 				cline.consecutiveMistakeCount++
 				cline.recordToolError("apply_diff")
 				pushToolResult(await cline.sayAndCreateMissingParamError("apply_diff", "path"))
+				debugLogger("[applyDiffTool] Tool execution failed", {
+					reason: "Path parameter is missing",
+					toolCall: block,
+				})
 				return
 			}
 
@@ -65,6 +70,10 @@ export async function applyDiffToolLegacy(
 				cline.consecutiveMistakeCount++
 				cline.recordToolError("apply_diff")
 				pushToolResult(await cline.sayAndCreateMissingParamError("apply_diff", "diff"))
+				debugLogger("[applyDiffTool] Tool execution failed", {
+					reason: "Diff parameter is missing",
+					toolCall: block,
+				})
 				return
 			}
 
@@ -85,6 +94,10 @@ export async function applyDiffToolLegacy(
 				const formattedError = `File does not exist at path: ${absolutePath}\n\n<error_details>\nThe specified file could not be found. Please verify the file path and try again.\n</error_details>`
 				await cline.say("error", formattedError)
 				pushToolResult(formattedError)
+				debugLogger("[applyDiffTool] Tool execution failed", {
+					reason: "File does not exist at path",
+					toolCall: block,
+				})
 				return
 			}
 
@@ -134,6 +147,10 @@ export async function applyDiffToolLegacy(
 				cline.recordToolError("apply_diff", formattedError)
 
 				pushToolResult(formattedError)
+				debugLogger("[applyDiffTool] Tool execution failed", {
+					reason: formattedError,
+					toolCall: block,
+				})
 				return
 			}
 

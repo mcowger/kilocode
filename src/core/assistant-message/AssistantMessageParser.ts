@@ -120,14 +120,6 @@ export class AssistantMessageParser {
 				const mcpToolInfo = extractMcpToolInfo(toolName)
 				const isValidTool = mcpToolInfo !== null || toolNames.includes(toolName as ToolName)
 
-				debugLogger("[AssistantMessageParser] Tool validation:", {
-					toolName,
-					isMcpTool: mcpToolInfo !== null,
-					mcpToolInfo,
-					isValidTool,
-					validToolNames: toolNames,
-				})
-
 				if (!isValidTool) {
 					debugLogger("[AssistantMessageParser] Unknown tool name in native call:", toolName)
 					continue

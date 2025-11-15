@@ -111,6 +111,9 @@ class DebugLogger {
 			const outputChannelLogger = createOutputChannelLogger(outputChannel)
 			DebugLogger.instance = createDualDebugLogger(outputChannelLogger)
 		}
+		DebugLogger.instance("DebugLogger initialized: WARNING: Sensitive information may be included in debug logs.")
+		DebugLogger.instance("A basic attempt has been made to scrub sensitive information from logs.")
+		DebugLogger.instance("Care should still be taken to avoid sharing logs that may contain sensitive information.")
 		return DebugLogger.instance
 	}
 }
