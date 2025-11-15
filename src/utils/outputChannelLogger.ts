@@ -1,4 +1,5 @@
 import * as vscode from "vscode"
+import { scrub, findSensitiveValues } from "@zapier/secret-scrubber"
 
 export type LogFunction = (...args: unknown[]) => void
 
@@ -50,6 +51,15 @@ export function createDualLogger(outputChannelLog: LogFunction): LogFunction {
 	}
 }
 
+function makeSafe(input: any): any {
+	const sensitiveValues = findSensitiveValues(input)
+	// Handle case where findSensitiveValues returns empty array
+	if (sensitiveValues.length === 0) {
+		return input
+	}
+	return scrub(input, sensitiveValues)
+}
+
 export function createDualDebugLogger(outputChannelLog: LogFunction): LogFunction {
 	return (...args: unknown[]) => {
 		const debugMode = vscode.workspace.getConfiguration("kilo-code").get<boolean>("debugMode") ?? false
@@ -59,7 +69,7 @@ export function createDualDebugLogger(outputChannelLog: LogFunction): LogFunctio
 			const joinedMessage = args
 				.map((arg) => {
 					if (typeof arg === "string") {
-						return arg
+						return makeSafe(arg)
 					} else {
 						try {
 							return JSON.stringify(
@@ -68,7 +78,7 @@ export function createDualDebugLogger(outputChannelLog: LogFunction): LogFunctio
 									if (typeof value === "bigint") return `BigInt(${value})`
 									if (typeof value === "function") return `Function: ${value.name || "anonymous"}`
 									if (typeof value === "symbol") return value.toString()
-									return value
+									return makeSafe(value)
 								},
 								2,
 							)
