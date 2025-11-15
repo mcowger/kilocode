@@ -54,7 +54,32 @@ export function createDualDebugLogger(outputChannelLog: LogFunction): LogFunctio
 	return (...args: unknown[]) => {
 		const debugMode = vscode.workspace.getConfiguration("kilo-code").get<boolean>("debugMode") ?? false
 		if (debugMode) {
-			outputChannelLog(...args)
+			// Join all arguments into a single string for output channel
+			// to avoid each argument being printed on a new line
+			const joinedMessage = args
+				.map((arg) => {
+					if (typeof arg === "string") {
+						return arg
+					} else {
+						try {
+							return JSON.stringify(
+								arg,
+								(key, value) => {
+									if (typeof value === "bigint") return `BigInt(${value})`
+									if (typeof value === "function") return `Function: ${value.name || "anonymous"}`
+									if (typeof value === "symbol") return value.toString()
+									return value
+								},
+								2,
+							)
+						} catch (error) {
+							return `[Non-serializable object: ${Object.prototype.toString.call(arg)}]`
+						}
+					}
+				})
+				.join(" ")
+
+			outputChannelLog(joinedMessage)
 			console.debug(...args)
 		}
 		// If debugMode is false, do nothing (implicit return)
@@ -72,7 +97,7 @@ class DebugLogger {
 
 	public static getLogger(): LogFunction {
 		if (!DebugLogger.instance) {
-			const outputChannel = vscode.window.createOutputChannel("Debug Logger")
+			const outputChannel = vscode.window.createOutputChannel("Kilo-Code Debug Logger")
 			const outputChannelLogger = createOutputChannelLogger(outputChannel)
 			DebugLogger.instance = createDualDebugLogger(outputChannelLogger)
 		}

@@ -132,7 +132,6 @@ export function* processNativeToolCallsFromDelta(
 
 			// If we have valid tool calls, yield them as a chunk
 			if (validToolCalls.length > 0) {
-				debugLogger("Processing native tool calls from delta:", validToolCalls)
 				yield {
 					type: "native_tool_calls",
 					toolCalls: validToolCalls,
