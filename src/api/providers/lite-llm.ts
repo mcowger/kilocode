@@ -131,12 +131,17 @@ export class LiteLLMHandler extends RouterProvider implements SingleCompletionHa
 		// Check if this is a GPT-5 model that requires max_completion_tokens instead of max_tokens
 		const isGPT5Model = this.isGpt5(modelId)
 
+		// kilocode_change start
 		// GPT-5 models require max_completion_tokens instead of the deprecated max_tokens parameter
+		// But blindly using info.maxTokens results in very wasted context windows.
+		// So outside of GPT-5, use a sane default.
 		if (isGPT5Model) {
+			let maxTokens: number | undefined = info.maxTokens ?? undefined
 			requestOptions.max_completion_tokens = maxTokens
 		} else {
-			requestOptions.max_tokens = maxTokens
+			requestOptions.max_tokens = this.options.litellmMaxTokens || litellmDefaultMaxTokens
 		}
+		// kilocode_change end
 
 		if (this.supportsTemperature(modelId)) {
 			if (this.options.modelTemperature) {
@@ -218,16 +223,18 @@ export class LiteLLMHandler extends RouterProvider implements SingleCompletionHa
 			if (this.supportsTemperature(modelId)) {
 				requestOptions.temperature = this.options.modelTemperature ?? litellmDefaultTemperature
 			}
-			let maxTokens: number = this.options.litellmMaxTokens || litellmDefaultMaxTokens
 
 			// Check if this is a GPT-5 model that requires max_completion_tokens instead of max_tokens
 			const isGPT5Model = this.isGpt5(modelId)
 			// kilocode_change start
 			// GPT-5 models require max_completion_tokens instead of the deprecated max_tokens parameter
+			// But blindly using info.maxTokens results in very wasted context windows.
+			// So outside of GPT-5, use a sane default.
 			if (isGPT5Model) {
+				let maxTokens: number | undefined = info.maxTokens ?? undefined
 				requestOptions.max_completion_tokens = maxTokens
 			} else {
-				requestOptions.max_tokens = maxTokens
+				requestOptions.max_tokens = this.options.litellmMaxTokens || litellmDefaultMaxTokens
 			}
 			// kilocode_change end
 
