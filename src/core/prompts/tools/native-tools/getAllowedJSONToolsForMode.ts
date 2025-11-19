@@ -22,6 +22,7 @@ export async function getAllowedJSONToolsForMode(
 	provider: ClineProvider | undefined,
 	diffEnabled: boolean = false,
 	model: { id: string; info: ModelInfo } | undefined,
+	cwd: string,
 ): Promise<OpenAI.Chat.ChatCompletionTool[]> {
 	const providerState: ClineProviderState | undefined = await provider?.getState()
 	const config = getModeConfig(mode, providerState?.customModes)

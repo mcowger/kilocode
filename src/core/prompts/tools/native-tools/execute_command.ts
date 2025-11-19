@@ -24,3 +24,30 @@ export default {
 		},
 	},
 } satisfies OpenAI.Chat.ChatCompletionTool
+
+export function execute_command(cwd: string): OpenAI.Chat.ChatCompletionTool {
+	return {
+		type: "function",
+		function: {
+			name: "execute_command",
+			description:
+				"Run a CLI command on the user's system. Tailor the command to the environment, explain what it does, and prefer relative paths or shell-appropriate chaining. Use the cwd parameter only when directed to run in a different directory.",
+			strict: true,
+			parameters: {
+				type: "object",
+				properties: {
+					command: {
+						type: "string",
+						description: "Shell command to execute",
+					},
+					cwd: {
+						type: ["string", "null"],
+						description: `The working directory to execute the command in (default: ${cwd})`,
+					},
+				},
+				required: ["command", "cwd"],
+				additionalProperties: false,
+			},
+		},
+	}
+}
