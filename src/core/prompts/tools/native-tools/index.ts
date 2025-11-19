@@ -4,7 +4,6 @@ import attemptCompletion from "./attempt_completion"
 import browserAction from "./browser_action"
 import codebaseSearch from "./codebase_search"
 import editFile from "./edit_file"
-import executeCommand from "./execute_command"
 import fetchInstructions from "./fetch_instructions"
 import generateImage from "./generate_image"
 import insertContent from "./insert_content"
@@ -17,7 +16,34 @@ import searchFiles from "./search_files"
 import switchMode from "./switch_mode"
 import updateTodoList from "./update_todo_list"
 import writeToFile from "./write_to_file"
+import execute_command from "./execute_command"
 import { apply_diff_single_file, apply_diff_multi_file } from "./apply_diff"
+
+export function getNativeTools(cwd: string): OpenAI.Chat.ChatCompletionTool[] {
+	return [
+		apply_diff_single_file,
+		apply_diff_multi_file,
+		askFollowupQuestion,
+		attemptCompletion,
+		browserAction,
+		codebaseSearch,
+		editFile,
+		fetchInstructions,
+		execute_command,
+		generateImage,
+		insertContent,
+		listCodeDefinitionNames,
+		listFiles,
+		newTask,
+		read_file_single,
+		read_file_multi,
+		runSlashCommand,
+		searchFiles,
+		switchMode,
+		updateTodoList,
+		writeToFile,
+	]
+}
 
 export const nativeTools = [
 	apply_diff_single_file,
@@ -27,8 +53,8 @@ export const nativeTools = [
 	browserAction,
 	codebaseSearch,
 	editFile,
-	executeCommand,
 	fetchInstructions,
+	execute_command,
 	generateImage,
 	insertContent,
 	listCodeDefinitionNames,
