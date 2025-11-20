@@ -7,6 +7,7 @@ import { CodeIndexManager } from "../../../../../services/code-index/manager"
 import { McpServerManager } from "../../../../../services/mcp/McpServerManager"
 import { ContextProxy } from "../../../../config/ContextProxy"
 import * as vscode from "vscode"
+import search_and_replace from "../search_and_replace"
 
 vi.mock("vscode")
 vi.mock("../../../../../services/code-index/manager")
@@ -71,11 +72,12 @@ describe("getAllowedJSONToolsForMode", () => {
 				mockProvider as ClineProvider,
 				true,
 				undefined,
+				"/home/user/workspace",
 			)
 
 			const applyDiffTool = tools.find((tool) => "function" in tool && tool.function.name === "apply_diff")
 			expect(applyDiffTool).toBeDefined()
-			expect(applyDiffTool).toEqual(apply_diff_single_file)
+			expect(applyDiffTool).toEqual(search_and_replace)
 			expect(applyDiffTool).not.toEqual(apply_diff_multi_file)
 		})
 
@@ -93,12 +95,13 @@ describe("getAllowedJSONToolsForMode", () => {
 				mockProvider as ClineProvider,
 				true,
 				undefined,
+				"/home/user/workspace",
 			)
 
 			const applyDiffTool = tools.find((tool) => "function" in tool && tool.function.name === "apply_diff")
 			expect(applyDiffTool).toBeDefined()
 			expect(applyDiffTool).toEqual(apply_diff_multi_file)
-			expect(applyDiffTool).not.toEqual(apply_diff_single_file)
+			expect(applyDiffTool).not.toEqual(search_and_replace)
 		})
 
 		it("should not include apply_diff when diffEnabled is false", async () => {
@@ -115,6 +118,7 @@ describe("getAllowedJSONToolsForMode", () => {
 				mockProvider as ClineProvider,
 				false,
 				undefined,
+				"/home/user/workspace",
 			)
 
 			const applyDiffTool = tools.find((tool) => "function" in tool && tool.function.name === "apply_diff")
@@ -135,6 +139,7 @@ describe("getAllowedJSONToolsForMode", () => {
 				mockProvider as ClineProvider,
 				true,
 				modelWithImages,
+				"/home/user/workspace",
 			)
 
 			// Check for duplicate tool names
@@ -156,12 +161,14 @@ describe("getAllowedJSONToolsForMode", () => {
 				mockProvider as ClineProvider,
 				true,
 				modelWithImages,
+				"/home/user/workspace",
 			)
 			const tools2 = await getAllowedJSONToolsForMode(
 				"code" as Mode,
 				mockProvider as ClineProvider,
 				true,
 				modelWithImages,
+				"/home/user/workspace",
 			)
 
 			expect(tools1.length).toBe(tools2.length)
@@ -182,6 +189,7 @@ describe("getAllowedJSONToolsForMode", () => {
 				mockProvider as ClineProvider,
 				true,
 				modelWithImages,
+				"/home/user/workspace",
 			)
 
 			const codebaseSearchTool = tools.find(
@@ -203,6 +211,7 @@ describe("getAllowedJSONToolsForMode", () => {
 				mockProvider as ClineProvider,
 				true,
 				modelWithImages,
+				"/home/user/workspace",
 			)
 
 			const browserActionTool = tools.find(
@@ -224,6 +233,7 @@ describe("getAllowedJSONToolsForMode", () => {
 				mockProvider as ClineProvider,
 				true,
 				modelWithoutImages,
+				"/home/user/workspace",
 			)
 
 			const browserActionTool = tools.find(
@@ -247,6 +257,7 @@ describe("getAllowedJSONToolsForMode", () => {
 				mockProvider as ClineProvider,
 				true,
 				modelWithImages,
+				"/home/user/workspace",
 			)
 
 			const todoListTool = tools.find((tool) => "function" in tool && tool.function.name === "update_todo_list")
@@ -267,6 +278,7 @@ describe("getAllowedJSONToolsForMode", () => {
 				mockProvider as ClineProvider,
 				true,
 				modelWithImages,
+				"/home/user/workspace",
 			)
 
 			const generateImageTool = tools.find(
@@ -289,6 +301,7 @@ describe("getAllowedJSONToolsForMode", () => {
 				mockProvider as ClineProvider,
 				true,
 				modelWithImages,
+				"/home/user/workspace",
 			)
 
 			const runSlashCommandTool = tools.find(
@@ -311,6 +324,7 @@ describe("getAllowedJSONToolsForMode", () => {
 				mockProvider as ClineProvider,
 				true,
 				modelWithImages,
+				"/home/user/workspace",
 			)
 
 			const askTool = tools.find((tool) => "function" in tool && tool.function.name === "ask_followup_question")
@@ -329,6 +343,7 @@ describe("getAllowedJSONToolsForMode", () => {
 				mockProvider as ClineProvider,
 				true,
 				modelWithoutImages,
+				"/home/user/workspace",
 			)
 
 			const completionTool = tools.find(
@@ -349,6 +364,7 @@ describe("getAllowedJSONToolsForMode", () => {
 				mockProvider as ClineProvider,
 				true,
 				modelWithImages,
+				"/home/user/workspace",
 			)
 
 			const switchModeTool = tools.find((tool) => "function" in tool && tool.function.name === "switch_mode")
@@ -367,6 +383,7 @@ describe("getAllowedJSONToolsForMode", () => {
 				mockProvider as ClineProvider,
 				true,
 				modelWithImages,
+				"/home/user/workspace",
 			)
 
 			const newTaskTool = tools.find((tool) => "function" in tool && tool.function.name === "new_task")
