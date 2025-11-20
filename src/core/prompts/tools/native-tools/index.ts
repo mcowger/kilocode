@@ -19,32 +19,6 @@ import write_to_file from "./write_to_file"
 import execute_command from "./execute_command"
 import { apply_diff_single_file, apply_diff_multi_file } from "./apply_diff"
 
-export function getNativeTools(cwd: string): OpenAI.Chat.ChatCompletionTool[] {
-	return [
-		apply_diff_single_file,
-		apply_diff_multi_file,
-		askFollowupQuestion,
-		attemptCompletion,
-		browserAction,
-		codebaseSearch,
-		editFile,
-		fetchInstructions,
-		execute_command,
-		generateImage,
-		insertContent,
-		listCodeDefinitionNames,
-		listFiles,
-		newTask,
-		read_file_single,
-		read_file_multi,
-		runSlashCommand,
-		searchFiles,
-		switchMode,
-		updateTodoList,
-		writeToFile,
-	]
-}
-
 export default function getNativeTools(cwd: string): OpenAI.Chat.ChatCompletionTool[] {
 	return [
 		apply_diff_single_file,
