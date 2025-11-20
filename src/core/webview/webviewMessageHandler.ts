@@ -826,6 +826,7 @@ export const webviewMessageHandler = async (
 						ollama: {},
 						lmstudio: {},
 						roo: {},
+          	synthetic: {}, // kilocode_change
 						chutes: {},
 					}
 
@@ -904,6 +905,7 @@ export const webviewMessageHandler = async (
 						baseUrl: apiConfiguration.inceptionLabsBaseUrl,
 					},
 				},
+				{ key: "synthetic", options: { provider: "synthetic", apiKey: apiConfiguration.syntheticApiKey } }, // kilocode_change
 				{
 					key: "roo",
 					options: {
