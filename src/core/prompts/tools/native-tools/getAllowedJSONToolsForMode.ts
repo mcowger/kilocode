@@ -93,12 +93,7 @@ export async function getAllowedJSONToolsForMode(
 	if (
 		!codeIndexManager ||
 		// kilcode_change start
-		!(
-			codeIndexManager.isFeatureEnabled &&
-			codeIndexManager.isFeatureConfigured &&
-			codeIndexManager.isInitialized &&
-			codeIndexManager.isManagedIndexingAvailable
-		)
+		!(codeIndexManager.isFeatureEnabled && codeIndexManager.isFeatureConfigured && codeIndexManager.isInitialized)
 		// kilcode_change end
 	) {
 		tools.delete("codebase_search")
