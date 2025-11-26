@@ -26,6 +26,7 @@ import { BaseProvider } from "./base-provider"
 import type { SingleCompletionHandler, ApiHandlerCreateMessageMetadata } from "../index"
 import { getApiRequestTimeout } from "./utils/timeout-config"
 import { handleOpenAIError } from "./utils/openai-error-handler"
+import { info } from "console"
 
 // TODO: Rename this to OpenAICompatibleHandler. Also, I think the
 // `OpenAINativeHandler` can subclass from this, since it's obviously
@@ -86,7 +87,8 @@ export class OpenAiHandler extends BaseProvider implements SingleCompletionHandl
 		messages: Anthropic.Messages.MessageParam[],
 		metadata?: ApiHandlerCreateMessageMetadata,
 	): ApiStream {
-		const { info: modelInfo, reasoning } = this.getModel()
+		const { info: modelInfo } = this.getModel()
+		const reasoning = modelInfo.reasoningEffort
 		const modelUrl = this.options.openAiBaseUrl ?? ""
 		const modelId = this.options.openAiModelId ?? ""
 		const enabledR1Format = this.options.openAiR1FormatEnabled ?? false
@@ -164,7 +166,7 @@ export class OpenAiHandler extends BaseProvider implements SingleCompletionHandl
 				messages: convertedMessages,
 				stream: true as const,
 				...(isGrokXAI ? {} : { stream_options: { include_usage: true } }),
-				...(reasoning && reasoning),
+				...(reasoning !== undefined && { reasoning_effort: reasoning }),
 			}
 
 			// Add max_tokens if needed
