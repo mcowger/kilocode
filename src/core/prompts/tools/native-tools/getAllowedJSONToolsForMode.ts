@@ -12,6 +12,7 @@ import { McpHub } from "../../../../services/mcp/McpHub"
 import { McpServerManager } from "../../../../services/mcp/McpServerManager"
 import { getMcpServerTools } from "./mcp_server"
 import { ClineProvider } from "../../../webview/ClineProvider"
+import { ManagedIndexer } from "../../../../services/code-index/managed/ManagedIndexer" // kilocode_change
 import { ContextProxy } from "../../../config/ContextProxy"
 import * as vscode from "vscode"
 import { read_file_multi, read_file_single } from "./read_file"
@@ -92,11 +93,13 @@ export async function getAllowedJSONToolsForMode(
 	// Conditionally exclude codebase_search if feature is disabled or not configured
 	if (
 		!codeIndexManager ||
-		// kilcode_change start
 		!(codeIndexManager.isFeatureEnabled && codeIndexManager.isFeatureConfigured && codeIndexManager.isInitialized)
-		// kilcode_change end
 	) {
-		tools.delete("codebase_search")
+		// kilocode_change start
+		if (!ManagedIndexer.getInstance()?.isEnabled()) {
+			tools.delete("codebase_search")
+		}
+		// kilocode_change end
 	}
 
 	if (isFastApplyAvailable(providerState)) {

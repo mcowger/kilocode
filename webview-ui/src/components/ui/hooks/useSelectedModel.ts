@@ -97,6 +97,7 @@ export const useSelectedModel = (apiConfiguration?: ProviderSettings) => {
 	const { kilocodeDefaultModel, virtualQuotaActiveModel } = useExtensionState()
 	const lmStudioModelId = provider === "lmstudio" ? apiConfiguration?.lmStudioModelId : undefined
 	const ollamaModelId = provider === "ollama" ? apiConfiguration?.ollamaModelId : undefined
+	// kilocode_change end
 
 	// Only fetch router models for dynamic providers
 	const shouldFetchRouterModels = isDynamicProvider(provider)
@@ -108,7 +109,7 @@ export const useSelectedModel = (apiConfiguration?: ProviderSettings) => {
 			kilocodeOrganizationId: apiConfiguration?.kilocodeOrganizationId,
 			geminiApiKey: apiConfiguration?.geminiApiKey,
 			googleGeminiBaseUrl: apiConfiguration?.googleGeminiBaseUrl,
-			syntheticApiKey: apiConfiguration?.syntheticApiKey, // kilocode_change
+			syntheticApiKey: apiConfiguration?.syntheticApiKey,
 		},
 		// kilocode_change end
 		{
@@ -475,7 +476,12 @@ function getSelectedModel({
 			const info = routerModels["vercel-ai-gateway"]?.[id]
 			return { id, info }
 		}
-		// kilocode_change start
+		//kilocode_change start
+		case "nano-gpt": {
+			const id = apiConfiguration.nanoGptModelId ?? "chatgpt-4o-latest"
+			const info = routerModels["nano-gpt"]?.[id]
+			return { id, info }
+		}
 		case "ovhcloud": {
 			const id = apiConfiguration.ovhCloudAiEndpointsModelId ?? ovhCloudAiEndpointsDefaultModelId
 			const info = routerModels.ovhcloud[id]
