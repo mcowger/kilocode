@@ -319,10 +319,12 @@ export class OpenAiHandler extends BaseProvider implements SingleCompletionHandl
 			const isAzureAiInference = this._isAzureAiInference(this.options.openAiBaseUrl)
 			const model = this.getModel()
 			const modelInfo = model.info
+			const reasoning = modelInfo.reasoningEffort
 
 			const requestOptions: OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming = {
 				model: model.id,
 				messages: [{ role: "user", content: prompt }],
+				...(reasoning !== undefined && { reasoning_effort: reasoning }),
 			}
 
 			// Add max_tokens if needed
