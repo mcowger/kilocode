@@ -96,6 +96,8 @@ export class OpenAiHandler extends BaseProvider implements SingleCompletionHandl
 		const deepseekReasoner = modelId.includes("deepseek-reasoner") || enabledR1Format
 		const ark = modelUrl.includes(".volces.com")
 
+		const normalizedReasoning = normalizeReasoning(reasoning)
+
 		if (modelId.includes("o1") || modelId.includes("o3") || modelId.includes("o4")) {
 			yield* this.handleO3FamilyMessage(modelId, systemPrompt, messages)
 			return
@@ -165,7 +167,7 @@ export class OpenAiHandler extends BaseProvider implements SingleCompletionHandl
 				messages: convertedMessages,
 				stream: true as const,
 				...(isGrokXAI ? {} : { stream_options: { include_usage: true } }),
-				...(reasoning !== undefined && { reasoning_effort: reasoning }),
+				...(normalizedReasoning !== undefined && { reasoning_effort: normalizedReasoning }),
 			}
 
 			// Add max_tokens if needed
@@ -317,11 +319,12 @@ export class OpenAiHandler extends BaseProvider implements SingleCompletionHandl
 			const model = this.getModel()
 			const modelInfo = model.info
 			const reasoning = modelInfo.reasoningEffort
+			const normalizedReasoning = normalizeReasoning(reasoning)
 
 			const requestOptions: OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming = {
 				model: model.id,
 				messages: [{ role: "user", content: prompt }],
-				...(reasoning !== undefined && { reasoning_effort: reasoning }),
+				...(normalizedReasoning !== undefined && { reasoning_effort: normalizedReasoning }),
 			}
 
 			// Add max_tokens if needed
@@ -517,4 +520,55 @@ export async function getOpenAiModels(baseUrl?: string, apiKey?: string, openAiH
 	} catch (error) {
 		return []
 	}
+}
+
+/**
+ * NormalizeIncoming<T> maps an incoming union type into the canonical ReasoningEffort type.
+ *
+ * It performs three transformations at the type level:
+ *   - "none"      → "minimal"
+ *   - undefined   → null
+ *   - all other valid ReasoningEffort strings are preserved as-is
+ *
+ * Because conditional types distribute over unions, passing in a union such as:
+ *   "none" | "low" | undefined
+ * results in:
+ *   "minimal" | "low" | null
+ *
+ * This lets us accept loosely-typed or external inputs but always convert them
+ * into the strict ReasoningEffort type without modifying the original union.
+ */
+type NormalizeIncoming<T> = T extends "none"
+	? "minimal"
+	: T extends undefined
+		? null
+		: T extends OpenAI.ReasoningEffort
+			? T
+			: never
+
+/**
+ * normalizeReasoning(value)
+ *
+ * Normalizes an incoming reasoning-effort value into the canonical ReasoningEffort.
+ *
+ * Runtime behavior:
+ *   - "none"      → "minimal"
+ *   - undefined   → null
+ *   - "minimal" | "low" | "medium" | "high" are returned unchanged
+ *
+ * Type-level behavior:
+ *   The return type is computed using NormalizeIncoming<T>, so the returned
+ *   type is *precisely* the mapped version of the input type T.
+ *
+ * For example, if `value` is typed as:
+ *   "none" | "low" | undefined
+ *
+ * Then the return type becomes:
+ *   "minimal" | "low" | null
+ *
+ * This ensures the function narrows the input union to the exact
+ * ReasoningEffort-compatible shape at both runtime *and* compile time.
+ */
+function normalizeReasoning<T extends string | undefined>(value: T): NormalizeIncoming<T> {
+	return (value === "none" ? "minimal" : value === undefined ? null : value) as NormalizeIncoming<T>
 }
