@@ -6,7 +6,6 @@ import {
 	litellmDefaultModelInfo,
 	litellmDefaultMaxTokens, // kilocode_change
 	litellmDefaultTemperature, // kilocode_change
-	getActiveToolUseStyle, // kilocode_change
 } from "@roo-code/types"
 
 import { calculateApiCostOpenAI } from "../../shared/cost"
@@ -18,7 +17,7 @@ import { convertToOpenAiMessages } from "../transform/openai-format"
 
 import type { SingleCompletionHandler, ApiHandlerCreateMessageMetadata } from "../index"
 import { RouterProvider } from "./router-provider"
-import { addNativeToolCallsToParams, processNativeToolCallsFromDelta } from "./kilocode/nativeToolCallHelpers"
+import { addNativeToolCallsToParams, ToolCallAccumulator } from "./kilocode/nativeToolCallHelpers"
 
 /**
  * LiteLLM provider handler
@@ -158,11 +157,12 @@ export class LiteLLMHandler extends RouterProvider implements SingleCompletionHa
 
 			let lastUsage
 
+			const toolCallAccumulator = new ToolCallAccumulator() // kilocode_change
 			for await (const chunk of completion) {
 				const delta = chunk.choices[0]?.delta
 				const usage = chunk.usage as LiteLLMUsage
 
-				yield* processNativeToolCallsFromDelta(delta, getActiveToolUseStyle(this.options)) // kilocode_change
+				yield* toolCallAccumulator.processChunk(chunk) // kilocode_change
 
 				if (delta?.content) {
 					yield { type: "text", text: delta.content }
