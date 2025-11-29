@@ -17,4 +17,5 @@ export const nativeFunctionCallingProviders = [
 	"minimax",
 	"anthropic",
 	"moonshot",
+	"cerebras",
 ] satisfies ProviderName[] as ProviderName[]
