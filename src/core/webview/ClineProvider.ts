@@ -1031,7 +1031,7 @@ ${prompt}
 			taskSyncEnabled,
 		} = await this.getState()
 
-		const enableDiff = apiConfiguration.diffEnabled ?? true
+		const enableDiff = apiConfiguration.diffEnabled ?? false
 
 		const task = new Task({
 			context: this.context, // kilocode_change
@@ -2967,7 +2967,7 @@ ${prompt}
 			remoteControlEnabled,
 		} = await this.getState()
 
-		const enableDiff = apiConfiguration.diffEnabled ?? true
+		const enableDiff = apiConfiguration.diffEnabled ?? false
 
 		if (!ProfileValidator.isProfileAllowed(apiConfiguration, organizationAllowList)) {
 			throw new OrganizationAllowListViolationError(t("common:errors.violated_organization_allowlist"))
