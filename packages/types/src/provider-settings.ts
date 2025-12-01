@@ -423,7 +423,7 @@ const litellmSchema = baseProviderSettingsSchema.extend({
 	litellmApiKey: z.string().optional(),
 	litellmModelId: z.string().optional(),
 	litellmUsePromptCache: z.boolean().optional(),
-	litellmMaxTokens: z.number().optional(),
+	litellmMaxTokens: z.number().optional(), // kilocode_change
 })
 
 const cerebrasSchema = apiModelIdProviderModelSchema.extend({

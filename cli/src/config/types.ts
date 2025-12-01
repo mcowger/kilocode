@@ -194,7 +194,7 @@ type LiteLLMProviderConfig = BaseProviderConfig & {
 	litellmBaseUrl?: string
 	litellmApiKey?: string
 	litellmUsePromptCache?: boolean
-	litellmMaxTokens?: number
+	litellmMaxTokens?: number // kilocode_change
 }
 
 type DeepInfraProviderConfig = BaseProviderConfig & {

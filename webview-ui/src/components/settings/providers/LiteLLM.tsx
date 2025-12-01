@@ -153,6 +153,7 @@ export const LiteLLM = ({
 				errorMessage={modelValidationError}
 			/>
 			{(() => {
+				// kilocode_change start
 				const selectedModelId = apiConfiguration.litellmModelId || litellmDefaultModelId
 				const selectedModel = routerModels?.litellm?.[selectedModelId]
 				const selectedModelMaxTokens = selectedModel?.maxTokens
@@ -191,6 +192,7 @@ export const LiteLLM = ({
 						</div>
 					</div>
 				)
+				// kilocode_change end
 			})()}
 
 			{/* Show prompt caching option if the selected model supports it */}
