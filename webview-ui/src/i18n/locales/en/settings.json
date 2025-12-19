@@ -343,8 +343,6 @@
 		"getRequestyBaseUrl": "Base URL",
 		"requestyUseCustomBaseUrl": "Use custom base URL",
 		"openRouterTransformsText": "Compress prompts and message chains to the context size (<a>OpenRouter Transforms</a>)",
-		"claudecodenativeApiKey": "Claude Code Native API Key",
-		"getClaudecodenativeApiKey": "Get Claude Code Native API Key",
 		"anthropicApiKey": "Anthropic API Key",
 		"getAnthropicApiKey": "Get Anthropic API Key",
 		"anthropicUseAuthToken": "Pass Anthropic API Key as Authorization header instead of X-Api-Key",
@@ -613,7 +611,8 @@
 			"description": "Optional path to your Claude Code CLI. Defaults to 'claude' if not set.",
 			"placeholder": "Default: claude",
 			"maxTokensLabel": "Max Output Tokens",
-			"maxTokensDescription": "Maximum number of output tokens for Claude Code responses. Default is 8000."
+			"maxTokensDescription": "Maximum number of output tokens for Claude Code responses. Default is 8000.",
+			"LongLivedToken": "Claude Code Long Lived Token"
 		},
 		"geminiCli": {
 			"description": "This provider uses OAuth authentication from the Gemini CLI tool and does not require API keys.",
