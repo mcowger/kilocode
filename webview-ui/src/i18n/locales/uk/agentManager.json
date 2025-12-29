@@ -25,7 +25,7 @@
 		"stopButtonTitle": "Зупинити агента",
 		"newButtonTitle": "Новий агент",
 		"refreshButtonTitle": "Оновити повідомлення",
-		"autoModeWarning": "Працює в повністю автоматичному режимі - агент виконуватиме дії без підтвердження",
+		"autoModeWarning": "Режим YOLO - операції з інструментами схвалюються автоматично",
 		"starting": "Запуск...",
 		"startAriaLabel": "Запустити агента з наданим промптом",
 		"keyboardHint": "Натисніть Enter для запуску, Shift+Enter для нового рядка",
@@ -56,7 +56,8 @@
 		"otherBranches": "Інші гілки",
 		"branchPickerTooltip": "Змінити базову гілку",
 		"noBranches": "Гілки не знайдено",
-		"noMatchingBranches": "Немає гілок, що відповідають твоєму пошуку"
+		"noMatchingBranches": "Немає гілок, що відповідають твоєму пошуку",
+		"openTerminal": "Відкрити термінал"
 	},
 	"messages": {
 		"waiting": "Очікування відповіді агента...",
@@ -68,7 +69,10 @@
 		"question": "У Kilo Code є питання",
 		"command": "Kilo хоче виконати команду",
 		"tool": "Kilo хоче використати інструмент",
-		"usingTool": "Використання інструменту: **{{tool}}** {{details}}"
+		"usingTool": "Використання інструменту: **{{tool}}** {{details}}",
+		"expandOutput": "Розгорнути вивід",
+		"collapseOutput": "Згорнути вивід",
+		"copyCommand": "Копіювати команду"
 	},
 	"chatInput": {
 		"autoMode": "Агент працює в повністю автоматичному режимі - введення заборонено",

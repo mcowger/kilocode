@@ -1,5 +1,21 @@
 # @kilocode/cli
 
+## 0.18.0
+
+### Minor Changes
+
+- [#4583](https://github.com/Kilo-Org/kilocode/pull/4583) [`845f8c1`](https://github.com/Kilo-Org/kilocode/commit/845f8c13b23496bf4aaf0792be9d52bf26645b64) Thanks [@kiloconnect](https://github.com/apps/kiloconnect)! - Add markdown theming support for Reasoning box content
+
+### Patch Changes
+
+- [#4590](https://github.com/Kilo-Org/kilocode/pull/4590) [`f2cc065`](https://github.com/Kilo-Org/kilocode/commit/f2cc0657870ae77a5720a872c9cd11b8315799b7) Thanks [@kiloconnect](https://github.com/apps/kiloconnect)! - feat: add session_title_generated event emission to CLI
+
+## 0.17.1
+
+### Patch Changes
+
+- [#4186](https://github.com/Kilo-Org/kilocode/pull/4186) [`6078a9c`](https://github.com/Kilo-Org/kilocode/commit/6078a9ce77512faaebcda54ea9d2e909cf6b340c) Thanks [@lambertjosh](https://github.com/lambertjosh)! - Default read permissions now require approval for read operations outside the workspace
+
 ## 0.17.0
 
 ### Minor Changes
