@@ -4,6 +4,7 @@ import { Anthropic } from "@anthropic-ai/sdk" // Keep for type usage only
 import {
 	litellmDefaultModelId,
 	litellmDefaultModelInfo,
+	TOOL_PROTOCOL,
 	litellmDefaultMaxTokens, // kilocode_change
 	litellmDefaultTemperature, // kilocode_change
 } from "@roo-code/types"
@@ -17,7 +18,6 @@ import { convertToOpenAiMessages } from "../transform/openai-format"
 
 import type { SingleCompletionHandler, ApiHandlerCreateMessageMetadata } from "../index"
 import { RouterProvider } from "./router-provider"
-import { addNativeToolCallsToParams, ToolCallAccumulator } from "./kilocode/nativeToolCallHelpers"
 
 /**
  * LiteLLM provider handler
@@ -116,6 +116,14 @@ export class LiteLLMHandler extends RouterProvider implements SingleCompletionHa
 			enhancedMessages = openAiMessages
 		}
 
+		// Check if model supports native tools and tools are provided with native protocol
+		const supportsNativeTools = info.supportsNativeTools ?? false
+		const useNativeTools =
+			supportsNativeTools &&
+			metadata?.tools &&
+			metadata.tools.length > 0 &&
+			metadata?.toolProtocol === TOOL_PROTOCOL.NATIVE
+
 		const requestOptions: OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming = {
 			model: modelId,
 			messages: [systemMessage, ...enhancedMessages],
@@ -123,6 +131,9 @@ export class LiteLLMHandler extends RouterProvider implements SingleCompletionHa
 			stream_options: {
 				include_usage: true,
 			},
+			...(useNativeTools && { tools: this.convertToolsForOpenAI(metadata.tools) }),
+			...(useNativeTools && metadata.tool_choice && { tool_choice: metadata.tool_choice }),
+			...(useNativeTools && { parallel_tool_calls: metadata?.parallelToolCalls ?? false }),
 		}
 		// Required by some providers; others default to max tokens allowed
 		let maxTokens: number = this.options.litellmMaxTokens || litellmDefaultMaxTokens
@@ -143,29 +154,33 @@ export class LiteLLMHandler extends RouterProvider implements SingleCompletionHa
 		// kilocode_change end
 
 		if (this.supportsTemperature(modelId)) {
-			if (this.options.modelTemperature) {
-				requestOptions.temperature = this.options.modelTemperature
-			} else {
-				requestOptions.temperature = litellmDefaultTemperature
-			}
+			requestOptions.temperature = this.options.modelTemperature ?? 0
 		}
-
-		addNativeToolCallsToParams(requestOptions, this.options, metadata) // kilocode_change
 
 		try {
 			const { data: completion } = await this.client.chat.completions.create(requestOptions).withResponse()
 
 			let lastUsage
 
-			const toolCallAccumulator = new ToolCallAccumulator() // kilocode_change
 			for await (const chunk of completion) {
 				const delta = chunk.choices[0]?.delta
 				const usage = chunk.usage as LiteLLMUsage
 
-				yield* toolCallAccumulator.processChunk(chunk) // kilocode_change
-
 				if (delta?.content) {
 					yield { type: "text", text: delta.content }
+				}
+
+				// Handle tool calls in stream - emit partial chunks for NativeToolCallParser
+				if (delta?.tool_calls) {
+					for (const toolCall of delta.tool_calls) {
+						yield {
+							type: "tool_call_partial",
+							index: toolCall.index,
+							id: toolCall.id,
+							name: toolCall.function?.name,
+							arguments: toolCall.function?.arguments,
+						}
+					}
 				}
 
 				if (usage) {
@@ -220,25 +235,17 @@ export class LiteLLMHandler extends RouterProvider implements SingleCompletionHa
 				messages: [{ role: "user", content: prompt }],
 			}
 
-			if (this.options.modelTemperature) {
-				requestOptions.temperature = this.options.modelTemperature
-			} else {
-				requestOptions.temperature = litellmDefaultTemperature
+			if (this.supportsTemperature(modelId)) {
+				requestOptions.temperature = this.options.modelTemperature ?? 0
 			}
 
-			// Check if this is a GPT-5 model that requires max_completion_tokens instead of max_tokens
 			const isGPT5Model = this.isGpt5(modelId)
-			// kilocode_change start
 			// GPT-5 models require max_completion_tokens instead of the deprecated max_tokens parameter
-			// But blindly using info.maxTokens results in very wasted context windows.
-			// So outside of GPT-5, use a sane default.
-			if (isGPT5Model) {
-				let maxTokens: number | undefined = info.maxTokens ?? undefined
-				requestOptions.max_completion_tokens = maxTokens
-			} else {
-				requestOptions.max_tokens = this.options.litellmMaxTokens || litellmDefaultMaxTokens
+			if (isGPT5Model && info.maxTokens) {
+				requestOptions.max_completion_tokens = info.maxTokens
+			} else if (info.maxTokens) {
+				requestOptions.max_tokens = info.maxTokens
 			}
-			// kilocode_change end
 
 			const response = await this.client.chat.completions.create(requestOptions)
 			return response.choices[0]?.message.content || ""
