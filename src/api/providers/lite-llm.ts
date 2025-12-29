@@ -220,8 +220,10 @@ export class LiteLLMHandler extends RouterProvider implements SingleCompletionHa
 				messages: [{ role: "user", content: prompt }],
 			}
 
-			if (this.supportsTemperature(modelId)) {
-				requestOptions.temperature = this.options.modelTemperature ?? litellmDefaultTemperature
+			if (this.options.modelTemperature) {
+				requestOptions.temperature = this.options.modelTemperature
+			} else {
+				requestOptions.temperature = litellmDefaultTemperature
 			}
 
 			// Check if this is a GPT-5 model that requires max_completion_tokens instead of max_tokens
