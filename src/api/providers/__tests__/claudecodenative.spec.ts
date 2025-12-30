@@ -61,25 +61,31 @@ describe("ClaudeCodeNativeHandler", () => {
 		expect(mockCreate).toHaveBeenCalledWith(
 			expect.objectContaining({
 				system: expect.arrayContaining([
-					{
+					expect.objectContaining({
 						type: "text",
 						text: "You are Claude Code, Anthropic's official CLI for Claude.",
-					},
+					}),
 					expect.objectContaining({
 						type: "text",
 						text: systemPrompt,
 					}),
 				]),
 			}),
-			expect.anything(),
+			{
+				headers: {
+					"anthropic-beta": "oauth-2025-04-20,prompt-caching-2024-07-31",
+				},
+			},
 		)
 
 		// Verify order: required message first
 		const callArgs = mockCreate.mock.calls[0][0]
-		expect(callArgs.system[0]).toEqual({
-			type: "text",
-			text: "You are Claude Code, Anthropic's official CLI for Claude.",
-		})
+		expect(callArgs.system[0]).toEqual(
+			expect.objectContaining({
+				type: "text",
+				text: "You are Claude Code, Anthropic's official CLI for Claude.",
+			}),
+		)
 		expect(callArgs.system[1]).toEqual(
 			expect.objectContaining({
 				type: "text",
