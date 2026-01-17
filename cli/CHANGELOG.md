@@ -1,5 +1,11 @@
 # @kilocode/cli
 
+## 0.22.3
+
+### Patch Changes
+
+- [#5116](https://github.com/Kilo-Org/kilocode/pull/5116) [`cf00ed8`](https://github.com/Kilo-Org/kilocode/commit/cf00ed870c1af723924177372da1054411e269cd) Thanks [@PeterDaveHello](https://github.com/PeterDaveHello)! - Make .env file optional in CLI - users can configure via KILO\_\* environment variables instead
+
 ## 0.22.2
 
 ### Patch Changes
