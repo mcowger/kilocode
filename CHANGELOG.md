@@ -1,5 +1,11 @@
 # kilo-code
 
+## 5.2.2
+
+### Patch Changes
+
+- [#5497](https://github.com/Kilo-Org/kilocode/pull/5497) [`95f9214`](https://github.com/Kilo-Org/kilocode/commit/95f92143d254741e6e0628f43ad90a3464fa7a09) Thanks [@chrarnoldus](https://github.com/chrarnoldus)! - Show sign in prompt when trying paid model when not logged in
+
 ## 5.2.1
 
 ### Patch Changes
