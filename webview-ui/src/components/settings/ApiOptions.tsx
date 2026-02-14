@@ -79,6 +79,7 @@ import {
 
 import {
 	Anthropic,
+	AnthropicCompatible,
 	Apertis, // kilocode_change
 	Baseten,
 	Corethink,
@@ -289,6 +290,15 @@ const ApiOptions = ({
 						openAiHeaders: headerObject,
 					},
 				})
+			} else if (selectedProvider === "anthropic-compatible") {
+				vscode.postMessage({
+					type: "requestAnthropicCompatibleModels",
+					values: {
+						baseUrl: apiConfiguration?.anthropicBaseUrl,
+						apiKey: apiConfiguration?.apiKey,
+						anthropicUseAuthToken: apiConfiguration?.anthropicUseAuthToken,
+					},
+				})
 			} else if (selectedProvider === "ollama") {
 				vscode.postMessage({ type: "requestOllamaModels" })
 			} else if (selectedProvider === "lmstudio") {
@@ -311,6 +321,9 @@ const ApiOptions = ({
 			apiConfiguration?.requestyApiKey,
 			apiConfiguration?.openAiBaseUrl,
 			apiConfiguration?.openAiApiKey,
+			apiConfiguration?.anthropicBaseUrl,
+			apiConfiguration?.apiKey,
+			apiConfiguration?.anthropicUseAuthToken,
 			apiConfiguration?.ollamaBaseUrl,
 			apiConfiguration?.lmStudioBaseUrl,
 			apiConfiguration?.litellmBaseUrl,
@@ -342,11 +355,10 @@ const ApiOptions = ({
 		const modelsAllowedByEndpoint =
 			selectedProvider === "moonshot" && filteredModels
 				? Object.fromEntries(
-						Object.entries(filteredModels).filter(
-							([modelId]) =>
-								apiConfiguration.moonshotBaseUrl === "https://api.kimi.com/coding/v1"
-									? modelId === "kimi-for-coding"
-									: modelId !== "kimi-for-coding",
+						Object.entries(filteredModels).filter(([modelId]) =>
+							apiConfiguration.moonshotBaseUrl === "https://api.kimi.com/coding/v1"
+								? modelId === "kimi-for-coding"
+								: modelId !== "kimi-for-coding",
 						),
 					)
 				: filteredModels
@@ -440,6 +452,7 @@ const ApiOptions = ({
 				litellm: { field: "litellmModelId", default: litellmDefaultModelId },
 				"nano-gpt": { field: "nanoGptModelId", default: nanoGptDefaultModelId }, // kilocode_change
 				anthropic: { field: "apiModelId", default: anthropicDefaultModelId },
+				"anthropic-compatible": { field: "apiModelId" },
 				cerebras: { field: "apiModelId", default: cerebrasDefaultModelId },
 				"claude-code": { field: "apiModelId", default: claudeCodeDefaultModelId },
 				"openai-codex": { field: "apiModelId", default: openAiCodexDefaultModelId },
@@ -524,6 +537,7 @@ const ApiOptions = ({
 			"openai-native": "openai",
 			openai: "openai-compatible",
 			"openai-responses": "openai-compatible", // kilocode_change
+			"anthropic-compatible": "anthropic",
 		}
 
 		const slug = slugs[selectedProvider] || selectedProvider
@@ -707,6 +721,16 @@ const ApiOptions = ({
 				<Anthropic
 					apiConfiguration={apiConfiguration}
 					setApiConfigurationField={setApiConfigurationField}
+					simplifySettings={fromWelcomeView}
+				/>
+			)}
+
+			{selectedProvider === "anthropic-compatible" && (
+				<AnthropicCompatible
+					apiConfiguration={apiConfiguration}
+					setApiConfigurationField={setApiConfigurationField}
+					organizationAllowList={organizationAllowList}
+					modelValidationError={modelValidationError}
 					simplifySettings={fromWelcomeView}
 				/>
 			)}

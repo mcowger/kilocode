@@ -72,6 +72,7 @@ import { singleCompletionHandler } from "../../utils/single-completion-handler" 
 import { searchCommits } from "../../utils/git"
 import { exportSettings, importSettingsWithFeedback } from "../config/importExport"
 import { getOpenAiModels } from "../../api/providers/openai"
+import { getAnthropicCompatibleModels } from "../../api/providers/fetchers/anthropic-compatible"
 import { getVsCodeLmModels } from "../../api/providers/vscode-lm"
 import { openMention } from "../mentions"
 import { resolveImageMentions } from "../mentions/resolveImageMentions"
@@ -1225,6 +1226,18 @@ export const webviewMessageHandler = async (
 				)
 
 				provider.postMessageToWebview({ type: "openAiModels", openAiModels })
+			}
+
+			break
+		case "requestAnthropicCompatibleModels":
+			if (message?.values?.baseUrl && message?.values?.apiKey) {
+				const anthropicCompatibleModels = await getAnthropicCompatibleModels(
+					message.values.baseUrl,
+					message.values.apiKey,
+					message.values.anthropicUseAuthToken,
+				)
+
+				provider.postMessageToWebview({ type: "anthropicCompatibleModels", anthropicCompatibleModels })
 			}
 
 			break

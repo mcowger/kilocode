@@ -100,6 +100,7 @@ export function getModelIdForProvider(provider: ProviderConfig): string {
 		case "kilocode":
 			return provider.kilocodeModel || ""
 		case "anthropic":
+		case "anthropic-compatible":
 			return provider.apiModelId || ""
 		case "openai-native":
 		case "openai-codex":

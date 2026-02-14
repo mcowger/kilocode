@@ -803,6 +803,13 @@ export const getProviderSettings = (provider: ProviderName, config: ProviderSett
 				createFieldConfig("anthropicBaseUrl", config, "Default"),
 			]
 
+		case "anthropic-compatible":
+			return [
+				createFieldConfig("apiKey", config),
+				createFieldConfig("apiModelId", config, ""),
+				createFieldConfig("anthropicBaseUrl", config),
+			]
+
 		case "openrouter":
 			return [
 				createFieldConfig("openRouterApiKey", config),
@@ -1065,6 +1072,7 @@ export const getProviderSettings = (provider: ProviderName, config: ProviderSett
 export const PROVIDER_DEFAULT_MODELS: Record<ProviderName, string> = {
 	kilocode: "anthropic/claude-sonnet-4",
 	anthropic: "claude-3-5-sonnet-20241022",
+	"anthropic-compatible": "",
 	"openai-native": "gpt-4o",
 	"openai-codex": "gpt-4o",
 	"openai-responses": "gpt-4o",

@@ -377,6 +377,16 @@ function getSelectedModel({
 			const info = customInfo ? { ...nativeToolDefaults, ...customInfo } : openAiModelInfoSaneDefaults
 			return { id, info }
 		}
+		case "anthropic-compatible": {
+			const id = apiConfiguration.apiModelId ?? ""
+			const customInfo = apiConfiguration?.anthropicCustomModelInfo
+			const info = customInfo
+				? { ...openAiModelInfoSaneDefaults, ...customInfo }
+				: id
+					? undefined
+					: openAiModelInfoSaneDefaults
+			return { id, info }
+		}
 		// kilocode_change end
 		// kilocode_change start - improved context window handling
 		case "ollama": {

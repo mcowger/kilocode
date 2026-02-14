@@ -61,6 +61,7 @@ export const PROVIDERS = [
 	{ value: "openrouter", label: "OpenRouter", proxy: false },
 	{ value: "deepinfra", label: "DeepInfra", proxy: false },
 	{ value: "anthropic", label: "Anthropic", proxy: false },
+	{ value: "anthropic-compatible", label: "Anthropic Compatible", proxy: true },
 	{ value: "claude-code", label: "Claude Code", proxy: false },
 	{ value: "cerebras", label: "Cerebras", proxy: false },
 	{ value: "gemini", label: "Google Gemini", proxy: false },

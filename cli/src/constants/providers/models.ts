@@ -137,6 +137,7 @@ export const PROVIDER_TO_ROUTER_NAME: Record<ProviderName, RouterName | null> = 
 	ovhcloud: "ovhcloud",
 	// Providers without dynamic model support
 	anthropic: null,
+	"anthropic-compatible": null,
 	bedrock: null,
 	vertex: null,
 	openai: null,
@@ -193,6 +194,7 @@ export const PROVIDER_MODEL_FIELD: Record<ProviderName, string | null> = {
 	ovhcloud: "ovhCloudAiEndpointsModelId",
 	// Providers without dynamic model support
 	anthropic: null,
+	"anthropic-compatible": null,
 	bedrock: null,
 	vertex: null,
 	openai: null,
@@ -263,6 +265,7 @@ export const getModelFieldForProvider = (provider: ProviderName): string | null 
  */
 export const DEFAULT_MODEL_IDS: Partial<Record<ProviderName, string>> = {
 	anthropic: anthropicDefaultModelId,
+	"anthropic-compatible": "",
 	bedrock: bedrockDefaultModelId,
 	vertex: vertexDefaultModelId,
 	gemini: geminiDefaultModelId,
@@ -323,6 +326,11 @@ export function getModelsByProvider(params: {
 			return {
 				models: anthropicModels as ModelRecord,
 				defaultModel: anthropicDefaultModelId,
+			}
+		case "anthropic-compatible":
+			return {
+				models: {},
+				defaultModel: "",
 			}
 		case "bedrock":
 			return {

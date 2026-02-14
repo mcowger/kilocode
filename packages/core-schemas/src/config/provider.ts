@@ -28,6 +28,16 @@ export const anthropicProviderSchema = baseProviderSchema.extend({
 	anthropicBeta1MContext: z.boolean().optional(),
 })
 
+export const anthropicCompatibleProviderSchema = baseProviderSchema.extend({
+	provider: z.literal("anthropic-compatible"),
+	apiModelId: z.string().optional(),
+	apiKey: z.string().optional(),
+	anthropicBaseUrl: z.string().optional(),
+	anthropicUseAuthToken: z.boolean().optional(),
+	anthropicDeploymentName: z.string().optional(),
+	anthropicCustomModelInfo: z.record(z.string(), z.unknown()).optional(),
+})
+
 // OpenAI Native provider
 export const openAINativeProviderSchema = baseProviderSchema.extend({
 	provider: z.literal("openai-native"),
@@ -417,6 +427,7 @@ export const fakeAIProviderSchema = baseProviderSchema.extend({
 export const providerConfigSchema = z.discriminatedUnion("provider", [
 	kilocodeProviderSchema,
 	anthropicProviderSchema,
+	anthropicCompatibleProviderSchema,
 	openAINativeProviderSchema,
 	openAICodexProviderSchema, // kilocode_change
 	openAIProviderSchema,
@@ -464,6 +475,7 @@ export const providerConfigSchema = z.discriminatedUnion("provider", [
 // Inferred types
 export type KilocodeProviderConfig = z.infer<typeof kilocodeProviderSchema>
 export type AnthropicProviderConfig = z.infer<typeof anthropicProviderSchema>
+export type AnthropicCompatibleProviderConfig = z.infer<typeof anthropicCompatibleProviderSchema>
 export type OpenAINativeProviderConfig = z.infer<typeof openAINativeProviderSchema>
 export type OpenAICodexProviderConfig = z.infer<typeof openAICodexProviderSchema> // kilocode_change
 export type OpenAIProviderConfig = z.infer<typeof openAIProviderSchema>

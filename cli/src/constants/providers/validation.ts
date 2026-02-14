@@ -7,6 +7,7 @@ import type { ProviderName } from "../../types/messages.js"
 export const PROVIDER_REQUIRED_FIELDS: Record<ProviderName, string[]> = {
 	kilocode: ["kilocodeToken", "kilocodeModel"],
 	anthropic: ["apiKey", "apiModelId"],
+	"anthropic-compatible": ["anthropicBaseUrl", "apiKey", "apiModelId"],
 	"openai-native": ["openAiNativeApiKey", "apiModelId"],
 	"openai-codex": ["apiModelId"],
 	openrouter: ["openRouterApiKey", "openRouterModelId"],

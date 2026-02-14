@@ -110,6 +110,7 @@ export const isInternalProvider = (key: string): key is InternalProvider =>
 export const customProviders = [
 	"openai",
 	"openai-responses", // kilocode_change
+	"anthropic-compatible",
 ] as const
 
 export type CustomProvider = (typeof customProviders)[number]
@@ -157,6 +158,7 @@ export const providerNames = [
 	"openai-codex",
 	"openai-native",
 	"openai-responses", // kilocode_change
+	"anthropic-compatible",
 	"qwen-code",
 	"roo",
 	// kilocode_change start
@@ -235,6 +237,12 @@ const anthropicSchema = apiModelIdProviderModelSchema.extend({
 	anthropicDeploymentName: z.string().optional(), // kilocode_change
 	anthropicBeta1MContext: z.boolean().optional(), // Enable 'context-1m-2025-08-07' beta for 1M context window.
 })
+
+// kilocode_change start
+const anthropicCompatibleSchema = anthropicSchema.extend({
+	anthropicCustomModelInfo: modelInfoSchema.nullish(),
+})
+// kilocode_change end
 
 const claudeCodeSchema = apiModelIdProviderModelSchema.extend({})
 
@@ -597,6 +605,7 @@ const defaultSchema = z.object({
 
 export const providerSettingsSchemaDiscriminated = z.discriminatedUnion("apiProvider", [
 	anthropicSchema.merge(z.object({ apiProvider: z.literal("anthropic") })),
+	anthropicCompatibleSchema.merge(z.object({ apiProvider: z.literal("anthropic-compatible") })),
 	claudeCodeSchema.merge(z.object({ apiProvider: z.literal("claude-code") })),
 	glamaSchema.merge(z.object({ apiProvider: z.literal("glama") })), // kilocode_change
 	nanoGptSchema.merge(z.object({ apiProvider: z.literal("nano-gpt") })), // kilocode_change
@@ -653,6 +662,7 @@ export const providerSettingsSchemaDiscriminated = z.discriminatedUnion("apiProv
 export const providerSettingsSchema = z.object({
 	apiProvider: providerNamesSchema.optional(),
 	...anthropicSchema.shape,
+	...anthropicCompatibleSchema.shape,
 	...claudeCodeSchema.shape,
 	...glamaSchema.shape, // kilocode_change
 	...nanoGptSchema.shape, // kilocode_change
@@ -817,7 +827,13 @@ export const modelIdKeysByProvider: Record<TypicalProvider, ModelIdKey> = {
  */
 
 // Providers that use Anthropic-style API protocol.
-export const ANTHROPIC_STYLE_PROVIDERS: ProviderName[] = ["anthropic", "claude-code", "bedrock", "minimax"]
+export const ANTHROPIC_STYLE_PROVIDERS: ProviderName[] = [
+	"anthropic",
+	"anthropic-compatible",
+	"claude-code",
+	"bedrock",
+	"minimax",
+]
 
 export const getApiProtocol = (provider: ProviderName | undefined, modelId?: string): "anthropic" | "openai" => {
 	if (provider && ANTHROPIC_STYLE_PROVIDERS.includes(provider)) {
@@ -852,6 +868,7 @@ export const MODELS_BY_PROVIDER: Record<
 		| "human-relay"
 		| "openai"
 		| "openai-responses" // kilocode_change
+		| "anthropic-compatible"
 		| "gemini"
 	>,
 	{ id: ProviderName; label: string; models: string[] }

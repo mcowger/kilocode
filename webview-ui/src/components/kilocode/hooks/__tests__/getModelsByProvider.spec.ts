@@ -48,6 +48,7 @@ describe("getModelsByProvider", () => {
 
 	it("returns models for all providers", () => {
 		const exceptions = [
+			"anthropic-compatible", // dynamic provider - models fetched from API
 			"fake-ai", // don't know what this is
 			"huggingface", // don't know what this is
 			"human-relay", // no models

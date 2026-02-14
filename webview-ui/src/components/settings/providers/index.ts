@@ -1,4 +1,5 @@
 export { Anthropic } from "./Anthropic"
+export { AnthropicCompatible } from "./AnthropicCompatible"
 export { Apertis } from "./Apertis" // kilocode_change
 export { Bedrock } from "./Bedrock"
 export { Cerebras } from "./Cerebras"

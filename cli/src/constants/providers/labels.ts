@@ -7,6 +7,7 @@ import type { ProviderName } from "../../types/messages.js"
 export const PROVIDER_LABELS: Record<ProviderName, string> = {
 	kilocode: "Kilo Code",
 	anthropic: "Anthropic",
+	"anthropic-compatible": "Anthropic Compatible",
 	"openai-native": "OpenAI",
 	"openai-codex": "OpenAI - ChatGPT Plus/Pro",
 	"openai-responses": "OpenAI Compatible (Responses)",

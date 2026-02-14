@@ -74,6 +74,17 @@ function validateModelsAndKeysProvided(apiConfiguration: ProviderSettings): stri
 				return i18next.t("settings:validation.apiKey")
 			}
 			break
+		case "anthropic-compatible":
+			if (!apiConfiguration.anthropicBaseUrl) {
+				return i18next.t("settings:validation.openAi")
+			}
+			if (!apiConfiguration.apiKey) {
+				return i18next.t("settings:validation.apiKey")
+			}
+			if (!apiConfiguration.apiModelId) {
+				return i18next.t("settings:validation.modelId")
+			}
+			break
 		case "bedrock":
 			if (!apiConfiguration.awsRegion) {
 				return i18next.t("settings:validation.awsRegion")

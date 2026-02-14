@@ -141,6 +141,8 @@ export function getProviderDefaultModelId(
 			return "gpt-4o" // Based on openai-native patterns
 		case "openai-responses": // kilocode_change
 			return "gpt-4o" // OpenAI-compatible Responses API // kilocode_change
+		case "anthropic-compatible":
+			return ""
 		case "openai-codex":
 			return openAiCodexDefaultModelId
 		case "mistral":

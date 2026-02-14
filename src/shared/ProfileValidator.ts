@@ -59,6 +59,7 @@ export class ProfileValidator {
 			case "openai-responses": // kilocode_change
 				return profile.openAiModelId
 			case "anthropic":
+			case "anthropic-compatible":
 			case "openai-native":
 			case "bedrock":
 			case "vertex":
